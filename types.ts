@@ -1,7 +1,3 @@
-
-
-
-
 export interface LeaveRequest {
     id: string;
     userId: string; 

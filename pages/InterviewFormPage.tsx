@@ -7,8 +7,6 @@ import { Interview, Customer } from '../types';
 import DataTable from '../components/common/DataTable';
 import Button from '../components/common/Button';
 import { ViewState } from '../components/ai/App';
-import { summarizeText } from '../services/aiService';
-import Loader from '../components/common/Loader';
 import BworksLogo from '../components/assets/BworksLogo';
 import VoiceNoteModal from '../components/ai/VoiceNoteModal';
 import Autocomplete from '../components/common/Autocomplete';
@@ -92,7 +90,6 @@ const InterviewForm = ({ setView, interviewId }: InterviewFormProps) => {
     });
 
     const [formState, setFormState] = useState(getInitialState());
-    const [isAiLoading, setIsAiLoading] = useState(false);
     const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
     const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -147,8 +144,8 @@ const InterviewForm = ({ setView, interviewId }: InterviewFormProps) => {
         const { id, value } = e.target;
         if (section === 'bizZiyaretEdecek') {
              setFormState(prev => ({ ...prev, aksiyonlar: { ...prev.aksiyonlar, bizZiyaretEdecek: { ...prev.aksiyonlar.bizZiyaretEdecek, [id]: value }}}));
-        } else {
-             setFormState(prev => ({ ...prev, [section]: { ...prev[section], [id]: value }}));
+        } else if (section === 'ziyaretci') {
+             setFormState(prev => ({ ...prev, ziyaretci: { ...prev.ziyaretci, [id]: value }}));
         }
     };
 
@@ -169,10 +166,9 @@ const InterviewForm = ({ setView, interviewId }: InterviewFormProps) => {
     };
 
     const handleSubmit = () => {
-        const requiredFields = ['firmaAdi', 'adSoyad', 'telefon', 'email'];
-        const missingField = requiredFields.find(field => !formState.ziyaretci[field as keyof typeof formState.ziyaretci]);
-        if (!formState.customerId || missingField) {
-            showNotification(missingField ? `Ziyaretçi ${missingField} alanı zorunludur.` : 'Lütfen bir müşteri seçin.', 'error');
+        const { firmaAdi, adSoyad, telefon, email } = formState.ziyaretci;
+        if (!formState.customerId || !firmaAdi || !adSoyad || !telefon || !email) {
+            showNotification('Lütfen Müşteri ve Ziyaretçi alanlarındaki zorunlu alanları (Firma Adı, Ad Soyad, Telefon, E-posta) doldurun.', 'error');
             return;
         }
 
@@ -327,8 +323,15 @@ interface InterviewFormPageProps {
 }
 
 const InterviewFormPage = ({ view, setView }: InterviewFormPageProps) => {
+    // This state management fix ensures the form resets correctly
+    const [formKey, setFormKey] = useState(view.id || 'list');
+    
+    useEffect(() => {
+        setFormKey(view.id || 'list');
+    }, [view.id]);
+
     if (view.id) {
-        return <InterviewForm setView={setView} interviewId={view.id} />;
+        return <InterviewForm key={formKey} setView={setView} interviewId={view.id} />;
     }
     return <InterviewListPage setView={setView} />;
 };

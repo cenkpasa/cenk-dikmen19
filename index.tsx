@@ -1,8 +1,7 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './components/ai/App';
+import App from './components/App';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { AuthProvider } from './contexts/AuthContext';

@@ -9,8 +9,6 @@ import Button from '../components/common/Button';
 import { downloadOfferAsPdf, getOfferHtml } from '../services/pdfService';
 import Loader from '../components/common/Loader';
 import { ViewState } from '../components/ai/App';
-import { generateFollowUpEmail, enhanceDescription } from '../services/aiService';
-import CnkLogo from '../components/assets/CnkLogo';
 import Modal from '../components/common/Modal';
 import { v4 as uuidv4 } from 'uuid';
 import Autocomplete from '../components/common/Autocomplete';
@@ -310,8 +308,11 @@ const OfferForm = ({ setView, offerId }: OfferFormProps) => {
 };
 
 const OfferPage = ({ view, setView }: OfferPageProps) => {
+    // FIX: Add a key to the form component to ensure it re-mounts and resets its state
+    // when switching between creating a new offer and editing an existing one.
+    const formKey = view.id || 'list';
     if (view.id) {
-        return <OfferForm setView={setView} offerId={view.id} />;
+        return <OfferForm key={formKey} setView={setView} offerId={view.id} />;
     }
     return <OfferListPage setView={setView} />;
 };

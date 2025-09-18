@@ -1,38 +1,36 @@
 
-
-
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNotification } from '@/contexts/NotificationContext';
-import SidebarLeft from '@/components/layout/SidebarLeft';
-import Header from '@/components/layout/Header';
-import { useSettings } from '@/contexts/SettingsContext';
-import { runAIAgent } from '@/services/aiAgentService';
-import { useNotificationCenter } from '@/contexts/NotificationCenterContext';
-import Loader from '@/components/common/Loader';
-import { Page as PageType } from '@/types';
-import CommandPalette from '@/components/common/CommandPalette';
-import { syncService } from '@/services/syncService';
+import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext';
+import SidebarLeft from './layout/SidebarLeft';
+import Header from './layout/Header';
+import { useSettings } from '../contexts/SettingsContext';
+import { runAIAgent } from '../services/aiAgentService';
+import { useNotificationCenter } from '../contexts/NotificationCenterContext';
+import Loader from './common/Loader';
+import { Page as PageType } from '../types';
+import CommandPalette from './common/CommandPalette';
+import { syncService } from '../services/syncService';
 
-const LoginPage = React.lazy(() => import('@/pages/LoginPage'));
-const Dashboard = React.lazy(() => import('@/pages/Dashboard'));
-const Customers = React.lazy(() => import('@/pages/Customers'));
-const Appointments = React.lazy(() => import('@/pages/Appointments'));
-const InterviewFormPage = React.lazy(() => import('@/pages/InterviewFormPage'));
-const OfferPage = React.lazy(() => import('@/pages/OfferPage'));
-const Users = React.lazy(() => import('@/pages/Users'));
-const CalculationToolsPage = React.lazy(() => import('@/pages/CalculationToolsPage'));
-const Profile = React.lazy(() => import('@/pages/Profile'));
-const EmailPage = React.lazy(() => import('@/pages/EmailPage'));
-const AIHubPage = React.lazy(() => import('@/pages/AIHubPage'));
-const LocationTrackingPage = React.lazy(() => import('@/pages/LocationTrackingPage'));
-const ErpIntegrationPage = React.lazy(() => import('@/pages/ErpIntegrationPage'));
-const AISettingsPage = React.lazy(() => import('@/pages/AISettingsPage'));
-const ReportPage = React.lazy(() => import('@/pages/ReportPage'));
-const EmailDraftsPage = React.lazy(() => import('@/pages/EmailDraftsPage'));
-const ReconciliationPage = React.lazy(() => import('@/pages/ReconciliationPage'));
-const AuditLogPage = React.lazy(() => import('@/pages/AuditLogPage'));
-const TechnicalInquiryPage = React.lazy(() => import('@/pages/TechnicalInquiryPage'));
+const LoginPage = React.lazy(() => import('../pages/LoginPage'));
+const Dashboard = React.lazy(() => import('../pages/Dashboard'));
+const Customers = React.lazy(() => import('../pages/Customers'));
+const Appointments = React.lazy(() => import('../pages/Appointments'));
+const InterviewFormPage = React.lazy(() => import('../pages/InterviewFormPage'));
+const OfferPage = React.lazy(() => import('../pages/OfferPage'));
+const Users = React.lazy(() => import('../pages/Users'));
+const CalculationToolsPage = React.lazy(() => import('../pages/CalculationToolsPage'));
+const Profile = React.lazy(() => import('../pages/Profile'));
+const EmailPage = React.lazy(() => import('../pages/EmailPage'));
+const AIHubPage = React.lazy(() => import('../pages/AIHubPage'));
+const LocationTrackingPage = React.lazy(() => import('../pages/LocationTrackingPage'));
+const ErpIntegrationPage = React.lazy(() => import('../pages/ErpIntegrationPage'));
+const AISettingsPage = React.lazy(() => import('../pages/AISettingsPage'));
+const ReportPage = React.lazy(() => import('../pages/ReportPage'));
+const EmailDraftsPage = React.lazy(() => import('../pages/EmailDraftsPage'));
+const ReconciliationPage = React.lazy(() => import('../pages/ReconciliationPage'));
+const AuditLogPage = React.lazy(() => import('../pages/AuditLogPage'));
+const TechnicalInquiryPage = React.lazy(() => import('../pages/TechnicalInquiryPage'));
 
 
 export type ViewState = {

@@ -1,15 +1,12 @@
-
-
-
 import { useMemo } from 'react';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { useErp } from '@/contexts/ErpContext';
-import { User, Invoice, Interview, Customer, Offer, ReportType, KmRecord, LocationRecord } from '@/types';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { usePersonnel } from '@/contexts/PersonnelContext';
-import { COMPANY_INFO } from '@/constants';
-import { formatCurrency } from '@/utils/formatting';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useErp } from '../contexts/ErpContext';
+import { User, Invoice, Interview, Customer, Offer, ReportType, KmRecord, LocationRecord } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
+import { usePersonnel } from '../contexts/PersonnelContext';
+import { COMPANY_INFO } from '../constants';
+import { formatCurrency } from '../utils/formatting';
 
 export interface ReportFilters {
     reportType: ReportType;
@@ -166,10 +163,12 @@ export const useReportGenerator = (filters: ReportFilters) => {
                     const firstSeenStr = firstSeen.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
                     const lastSeenStr = lastSeen.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
                     
-                    let status = "✔️ Zamanında";
-                    if (firstSeenStr > COMPANY_INFO.workStartTime) status = "❗ Geç Başladı";
+                    let statusParts = [];
+                    if (firstSeenStr > COMPANY_INFO.workStartTime) {
+                        statusParts.push(t('lateStart'));
+                    }
                     if (lastSeenStr < COMPANY_INFO.workEndTime) {
-                        status = status === "✔️ Zamanında" ? "❗ Erken Çıktı" : "❗ Geç Başladı & Erken Çıktı";
+                        statusParts.push(t('earlyLeave'));
                     }
 
                     reportData.push({
@@ -177,7 +176,7 @@ export const useReportGenerator = (filters: ReportFilters) => {
                         date: firstSeen.toISOString().slice(0, 10),
                         firstSeen: firstSeenStr,
                         lastSeen: lastSeenStr,
-                        status: status,
+                        status: statusParts.length > 0 ? statusParts.join(' & ') : 'Zamanında',
                     });
                 });
 
