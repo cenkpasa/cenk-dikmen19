@@ -2,6 +2,7 @@
 
 
 
+
 import Dexie, { type Table } from 'dexie';
 import { User, Customer, Appointment, Interview, Offer, ErpSettings, StokOgeleri, Notification, LeaveRequest, KmRecord, LocationRecord, AISettings, EmailDraft, Reconciliation, CalculatorState, CalculationHistoryItem, IncomingInvoice, OutgoingInvoice, AuditLog, ShiftTemplate, ShiftAssignment, Warehouse, StockLevel, SyncQueueItem, PayslipEntry, FinancialPlan, FinancialPlanItem, TechnicalInquiry, Fatura } from '../types';
 import { DEFAULT_ADMIN, MOCK_APPOINTMENTS, MOCK_CUSTOMERS, MOCK_FINANCIAL_PLAN_2025 } from '../constants';
@@ -97,7 +98,8 @@ const MOCK_PAYSLIP_ENTRIES: PayslipEntry[] = [
 
 export const seedInitialData = async () => {
     try {
-        await (db as Dexie).transaction('rw', db.tables, async () => {
+// Fix: Property 'tables' does not exist on type 'AppDatabase'. Cast db to Dexie to access the property.
+        await db.transaction('rw', (db as Dexie).tables, async () => {
             if ((await db.incomingInvoices.count()) === 0) {
                 const incomingWithIds = MOCK_INCOMING_INVOICES.map(inv => ({ ...inv }));
                 await db.incomingInvoices.bulkAdd(incomingWithIds);
@@ -145,7 +147,8 @@ export const seedDatabase = async () => {
             { id: 'sube-a', code: 'SUBE-A', name: 'A Şubesi Deposu' },
         ];
 
-        await (db as Dexie).transaction('rw', db.tables, async () => {
+// Fix: Property 'tables' does not exist on type 'AppDatabase'. Cast db to Dexie to access the property.
+        await db.transaction('rw', (db as Dexie).tables, async () => {
             await db.users.clear();
             await db.users.bulkPut([adminUser, ...MOCK_USERS_PAYSLIP]);
             await db.payslipEntries.bulkPut(MOCK_PAYSLIP_ENTRIES);

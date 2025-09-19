@@ -1,16 +1,17 @@
 import axios, { AxiosInstance } from 'axios';
 
-// Fix: Define an interface for our augmented Axios instance to resolve missing method errors.
-interface CnkApi extends AxiosInstance {
+// Fix: Changed interface to a type intersection to correctly inherit AxiosInstance methods.
+type CnkApi = AxiosInstance & {
     login(username: string, password: string): Promise<{ success: boolean; messageKey: string }>;
     sendPasswordResetCode(email: string): Promise<{ success: boolean; messageKey: string }>;
     verifyPasswordResetCode(email: string, code: string): Promise<{ success: boolean; messageKey: string }>;
     generateText(prompt: string): Promise<string>;
     parseCard(base64Image: string): Promise<any>;
-}
+};
 
 export const api = axios.create({
-    baseURL: import.meta.env?.VITE_API_BASE_URL || 'http://localhost:8080',
+// Fix: Property 'env' does not exist on type 'ImportMeta'. Cast to any to bypass the type error.
+    baseURL: (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8080',
     withCredentials: false
 }) as CnkApi;
 

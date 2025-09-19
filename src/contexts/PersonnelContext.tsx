@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { LeaveRequest, KmRecord, LocationRecord, ShiftTemplate, ShiftAssignment, PayslipEntry } from '@/types';

@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import StatCard from '@/components/dashboard/StatCard';
 import LatestActivity from '@/components/dashboard/LatestActivity';

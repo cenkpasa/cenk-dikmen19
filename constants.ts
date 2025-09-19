@@ -230,6 +230,7 @@ export const MESSAGES: Record<string, Record<string, string>> = {
         'reminder1h': '1 saat önce',
         'reminder1d': '1 gün önce',
         'deleteAppointmentConfirm': 'Randevuyu silmek istediğinizden emin misiniz?',
+        'appointmentReminder': 'Yaklaşan randevu: {title}, {customerName} ile {time} başlıyor.',
 
         // --- AI & Modals ---
         'cameraError': 'Kamera başlatılamadı.',
@@ -791,6 +792,7 @@ export const MESSAGES: Record<string, Record<string, string>> = {
         'reject': 'Reject',
         'devamsizlik': 'Absence',
         'eveningKmLessThanMorning': 'Evening kilometer cannot be less than the morning value.',
+        'appointmentReminder': 'Upcoming appointment: {title} with {customerName} starts at {time}.',
     }
 };
 

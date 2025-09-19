@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Customer, Appointment, Interview, Offer, TechnicalInquiry } from '@/types';

@@ -131,7 +131,7 @@ const ReportPage = () => {
                                     <div className="mt-4 p-4 bg-cnk-bg-light rounded-cnk-element">
                                         <h3 className="font-bold mb-2">Özet</h3>
                                         {Object.entries(summary).map(([key, value]) => (
-                                            <p key={key}><strong>{t(key)}:</strong> {value}</p>
+                                            <p key={key}><strong>{t(key)}:</strong> {String(value)}</p>
                                         ))}
                                     </div>
                                 </div>
@@ -151,3 +151,5 @@ const ReportPage = () => {
         </div>
     );
 };
+
+export default ReportPage;

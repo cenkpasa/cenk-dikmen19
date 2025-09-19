@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotification } from '@/contexts/NotificationContext';
@@ -33,8 +35,8 @@ const AuditLogPage = React.lazy(() => import('@/pages/AuditLogPage'));
 const TechnicalInquiryPage = React.lazy(() => import('@/pages/TechnicalInquiryPage'));
 
 
-const App = () => {
-    const { currentUser, loading } = useAuth();
+const AppContent = () => {
+    const { currentUser } = useAuth();
     const { NotificationContainer } = useNotification();
     const [isLeftSidebarOpen, setLeftSidebarOpen] = useState(false);
     const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -45,42 +47,38 @@ const App = () => {
     const { appointments, customers } = useData();
 
     useEffect(() => {
+        if (!settings || !currentUser) return;
+
         const initializeAIAgent = async () => {
-            if (settings && currentUser) { // Ensure user is logged in
+            if (settings && currentUser) {
                 const insights = await runAIAgent(settings);
                 await Promise.all(
                     insights.map(insight => addNotification(insight))
                 );
             }
         };
-        // Run agent after a delay on initial load
         const timer = setTimeout(initializeAIAgent, 5000);
-        
-        // Also run periodically
-        const interval = setInterval(initializeAIAgent, 5 * 60 * 1000); // every 5 minutes
+        const interval = setInterval(initializeAIAgent, 5 * 60 * 1000);
 
         return () => {
             clearTimeout(timer);
             clearInterval(interval);
         };
-    }, [settings, currentUser, addNotification]);
+    }, [settings, currentUser?.id, addNotification]);
     
-    // Effect for checking appointment reminders
     useEffect(() => {
         const checkReminders = () => {
             const now = new Date();
-            const sentReminders = new Set<string>(JSON.parse(sessionStorage.getItem('sentReminders') || '[]'));
+            const sentReminders = new Set<string>(JSON.parse(localStorage.getItem('sentReminders') || '[]'));
 
             appointments.forEach(app => {
-                if (!app.reminder || app.reminder === 'none' || sentReminders.has(app.id)) {
-                    return;
-                }
-
+                if (!app.reminder || app.reminder === 'none' || sentReminders.has(app.id)) return;
+                
                 const appStartTime = new Date(app.start);
-                if (appStartTime < now) return; // Appointment is in the past
+                if (appStartTime < now) return;
 
                 let reminderTime = new Date(appStartTime);
-                const durationMatch = app.reminder.match(/^(\d+)([mhd])$/); // 15m, 1h, 1d
+                const durationMatch = app.reminder.match(/^(\d+)([mhd])$/);
                 if (!durationMatch) return;
 
                 const value = parseInt(durationMatch[1], 10);
@@ -102,25 +100,17 @@ const App = () => {
                         type: 'appointment',
                         link: { page: 'appointments' }
                     });
-                    
                     sentReminders.add(app.id);
                 }
             });
 
-            sessionStorage.setItem('sentReminders', JSON.stringify(Array.from(sentReminders)));
+            localStorage.setItem('sentReminders', JSON.stringify(Array.from(sentReminders)));
         };
 
-        const intervalId = setInterval(checkReminders, 60000); // Check every minute
-        checkReminders(); // Initial check
+        const intervalId = setInterval(checkReminders, 60000);
+        checkReminders();
         return () => clearInterval(intervalId);
     }, [appointments, customers, addNotification]);
-
-
-    useEffect(() => {
-        if (!currentUser) {
-            setLeftSidebarOpen(false);
-        }
-    }, [currentUser]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -134,16 +124,10 @@ const App = () => {
     }, []);
 
     useEffect(() => {
-        const handleOnline = () => {
-            syncService.processSyncQueue();
-        };
+        const handleOnline = () => syncService.processSyncQueue();
         window.addEventListener('online', handleOnline);
-        if (navigator.onLine) {
-            handleOnline();
-        }
-        return () => {
-            window.removeEventListener('online', handleOnline);
-        };
+        if (navigator.onLine) handleOnline();
+        return () => window.removeEventListener('online', handleOnline);
     }, []);
 
     const executeCommand = useCallback((action: () => void) => {
@@ -151,34 +135,15 @@ const App = () => {
         setIsPaletteOpen(false);
     }, []);
 
-    if (loading) {
-        return <Loader fullScreen={true} />;
-    }
-
-    if (!currentUser) {
-        return (
-            <>
-                <NotificationContainer />
-                <Suspense fallback={<Loader fullScreen={true} />}>
-                    <LoginPage />
-                </Suspense>
-            </>
-        );
-    }
-    
     return (
         <div className="app-container grid min-h-screen bg-cnk-bg-light text-cnk-txt-secondary-light md:grid-cols-[260px_1fr]">
             <NotificationContainer />
             <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} executeCommand={executeCommand} />
-            
             <SidebarLeft isOpen={isLeftSidebarOpen} setIsOpen={setLeftSidebarOpen} />
-            
             <div className="flex flex-col flex-grow min-w-0">
-                <Header 
-                    onToggleLeftSidebar={() => setLeftSidebarOpen(true)}
-                />
+                <Header onToggleLeftSidebar={() => setLeftSidebarOpen(true)} />
                 <main className="main-content flex-grow overflow-y-auto bg-cnk-bg-light p-4 md:p-6">
-                     <div id="page-content" className="min-h-[calc(100vh-120px)]">
+                    <div id="page-content" className="min-h-[calc(100vh-120px)]">
                         <Suspense fallback={<div className="flex justify-center items-center min-h-[calc(100vh-120px)]"><Loader /></div>}>
                             <Routes>
                                 <Route path="/" element={<Dashboard />} />
@@ -207,6 +172,24 @@ const App = () => {
                 </main>
             </div>
         </div>
+    );
+}
+
+const App = () => {
+    const { currentUser, loading } = useAuth();
+    const { NotificationContainer } = useNotification();
+
+    if (loading) {
+        return <Loader fullScreen={true} />;
+    }
+
+    return (
+        <>
+            <NotificationContainer />
+            <Suspense fallback={<Loader fullScreen={true} />}>
+                {currentUser ? <AppContent /> : <LoginPage />}
+            </Suspense>
+        </>
     );
 };
 

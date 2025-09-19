@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,11 +17,7 @@ import CustomerForm from '@/components/forms/CustomerForm';
 import { useNavigate, useParams } from 'react-router-dom';
 import { summarizeText } from '@/services/aiService';
 
-interface InterviewListPageProps {
-    onNavigate: (path: string) => void;
-}
-
-const InterviewListPage = ({ onNavigate }: InterviewListPageProps) => {
+const InterviewListPage = ({ onNavigate }: { onNavigate: (path: string) => void }) => {
     const { interviews, customers } = useData();
     const { t } = useLanguage();
     const { currentUser } = useAuth();
@@ -64,11 +62,7 @@ const SEKTOR_OPTIONS = [
     "Kasa-Pervaz-Kapı", "Panel", "Mobilya", "Diğer"
 ];
 
-interface InterviewFormProps {
-    interviewId?: string;
-}
-
-const InterviewForm = ({ interviewId }: InterviewFormProps) => {
+const InterviewForm = ({ interviewId }: { interviewId?: string }) => {
     const { interviews, customers, addInterview, updateInterview, technicalInquiries } = useData();
     const { t } = useLanguage();
     const { currentUser } = useAuth();
@@ -283,22 +277,19 @@ const InterviewForm = ({ interviewId }: InterviewFormProps) => {
                     <textarea value={formState.notlar} onChange={e => setFormState(p => ({...p, notlar: e.target.value}))} rows={15} className="w-full p-2 border border-gray-400" style={{ backgroundImage: gridBg, backgroundSize: '20px 20px' }} readOnly={isReadOnly}></textarea>
                     {!isReadOnly && <Button onClick={() => setIsVoiceModalOpen(true)} icon="fas fa-microphone" size="sm" className="absolute top-2 right-2"/>}
                 </div>
-                
-                {!isReadOnly && formState.notlar && (
-                    <div className="border border-cnk-accent-primary/50 bg-cnk-accent-primary/10 p-3 rounded-md">
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="font-bold text-cnk-accent-primary">{t('aiAssistant')}</h3>
-                            <Button onClick={handleSummarize} isLoading={isSummarizing} size="sm">{t('summarizeNotes')}</Button>
-                        </div>
-                        {formState.aiSummary && (
-                            <div>
-                                <h4 className="font-semibold text-sm">{t('aiSummary')}</h4>
-                                <p className="text-sm whitespace-pre-wrap">{formState.aiSummary}</p>
-                            </div>
-                        )}
+                 {!isReadOnly && (
+                    <div className="my-2">
+                        <Button onClick={handleSummarize} isLoading={isSummarizing} icon="fas fa-robot" variant="secondary" disabled={!formState.notlar}>
+                            {t('summarizeNotes')}
+                        </Button>
                     </div>
                 )}
-                
+                {formState.aiSummary && (
+                    <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border-l-4 border-blue-500">
+                        <h4 className="font-bold text-blue-800">{t('aiSummary')}</h4>
+                        <p className="text-sm text-cnk-txt-secondary-light whitespace-pre-wrap">{formState.aiSummary}</p>
+                    </div>
+                )}
                 <div className="flex justify-between items-center">
                     <div>GÖRÜŞMEYİ YAPAN KİŞİ: <input id="gorusmeyiYapan" type="text" value={formState.gorusmeyiYapan} onChange={(e) => setFormState(p => ({...p, gorusmeyiYapan: e.target.value}))} readOnly={isReadOnly} className="border-b border-gray-400 focus:outline-none bg-transparent" /></div>
                     <div className="flex gap-2">
@@ -351,8 +342,6 @@ const InterviewFormPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
-    // The router in App.tsx handles the /interviews path, so we check for `id` presence.
-    // If id exists, it's a detail/edit/create view. If not, it's the list view.
     if (id) {
         return <InterviewForm interviewId={id} />;
     }

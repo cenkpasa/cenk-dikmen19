@@ -489,6 +489,7 @@ export interface Fatura {
   tarih: string; // ISO format
   paraBirimi: ParaBirimi;
   toplamTutar: number;
+  description?: string;
 }
 
 export interface StokOgeleri {

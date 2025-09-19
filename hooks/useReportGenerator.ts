@@ -220,7 +220,7 @@ export const useReportGenerator = (filters: ReportFilters) => {
                     entry.total += invoice.toplamTutar;
                     entry.count++;
                     
-                    const category = determineCategory(''); // Fatura type has no description
+                    const category = determineCategory(invoice.description || '');
                     entry.categories[category] = (entry.categories[category] || 0) + invoice.toplamTutar;
                 }
                 
@@ -247,7 +247,7 @@ export const useReportGenerator = (filters: ReportFilters) => {
                     const month = new Date(inv.tarih).toISOString().slice(0, 7);
                     monthlySpending[month] = (monthlySpending[month] || 0) + inv.toplamTutar;
 
-                    const category = determineCategory('');
+                    const category = determineCategory(inv.description || '');
                     categorySpending[category] = (categorySpending[category] || 0) + inv.toplamTutar;
                 });
                 
