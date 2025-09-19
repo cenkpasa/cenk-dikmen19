@@ -1,3 +1,6 @@
+
+
+
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotification } from '@/contexts/NotificationContext';
@@ -9,7 +12,7 @@ import { useNotificationCenter } from '@/contexts/NotificationCenterContext';
 import Loader from '@/components/common/Loader';
 import CommandPalette from '@/components/common/CommandPalette';
 import { syncService } from '@/services/syncService';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useData } from '@/contexts/DataContext';
 
 // Lazy load pages
@@ -46,24 +49,16 @@ const App = () => {
 
     useEffect(() => {
         const initializeAIAgent = async () => {
-            if (settings && currentUser) { // Ensure user is logged in
+            if (settings) {
                 const insights = await runAIAgent(settings);
                 await Promise.all(
                     insights.map(insight => addNotification(insight))
                 );
             }
         };
-        // Run agent after a delay on initial load
-        const timer = setTimeout(initializeAIAgent, 5000);
-        
-        // Also run periodically
-        const interval = setInterval(initializeAIAgent, 5 * 60 * 1000); // every 5 minutes
-
-        return () => {
-            clearTimeout(timer);
-            clearInterval(interval);
-        };
-    }, [settings, currentUser, addNotification]);
+        const timer = setTimeout(initializeAIAgent, 3000);
+        return () => clearTimeout(timer);
+    }, [settings, addNotification]);
     
     // Effect for checking appointment reminders
     useEffect(() => {
@@ -135,6 +130,7 @@ const App = () => {
 
     useEffect(() => {
         const handleOnline = () => {
+            console.log("Connection established. Synchronizing pending operations...");
             syncService.processSyncQueue();
         };
         window.addEventListener('online', handleOnline);

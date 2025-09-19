@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from '@/components/App';
 import AppProviders from '@/components/AppProviders';
-import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { seedDatabase } from '@/services/dbService';
 import Loader from '@/components/common/Loader';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 const AppInitializer = () => {
     const [isInitialized, setIsInitialized] = useState(false);
@@ -36,6 +36,7 @@ const AppInitializer = () => {
         </AppProviders>
     );
 };
+
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

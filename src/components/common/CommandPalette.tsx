@@ -30,7 +30,7 @@ const CommandPalette = ({ isOpen, onClose, executeCommand }: CommandPaletteProps
         { id: 'go_appointments', title: t('appointmentsTitle'), icon: 'fa-calendar-check', keywords: 'randevu takvim', action: () => navigate('/appointments') },
         { id: 'go_offers', title: t('offerManagement'), icon: 'fa-file-invoice-dollar', keywords: 'teklif', action: () => navigate('/offers') },
         { id: 'create_offer', title: `${t('createOffer')}`, icon: 'fa-plus', action: () => navigate('/offers/create') },
-        { id: 'create_customer', title: `${t('addNewCustomer')}`, icon: 'fa-plus', action: () => { /* This would require a global modal context or similar */ alert('Bu özellik yakında!'); } },
+        { id: 'create_interview', title: `${t('addInterview')}`, icon: 'fa-plus', action: () => navigate('/interviews/create') },
         { id: 'go_reports', title: t('reports'), icon: 'fa-chart-line', action: () => navigate('/reports') },
         { id: 'go_profile', title: t('profileTitle'), icon: 'fa-user', action: () => navigate('/profile') },
     ], [t, navigate]);
