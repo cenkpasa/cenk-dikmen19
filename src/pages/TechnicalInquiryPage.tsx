@@ -1,18 +1,15 @@
-
-
 import React, { useState, useEffect } from 'react';
-import { useData } from '../contexts/DataContext';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useAuth } from '../contexts/AuthContext';
-import { TechnicalInquiry, Interview } from '../types';
-import Button from '../components/common/Button';
-import DrillingForm from '../components/technical-inquiry/DrillingForm';
-import TappingForm from '../components/technical-inquiry/TappingForm';
-import EndMillForm from '../components/technical-inquiry/EndMillForm';
-import { downloadTechnicalInquiryAsPdf, getDrillingInquiryHtml, getTappingInquiryHtml, getEndMillInquiryHtml } from '../services/pdfService';
-import Modal from '../components/common/Modal';
+import { useData } from '@/contexts/DataContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { TechnicalInquiry, Interview } from '@/types';
+import Button from '@/components/common/Button';
+import DrillingForm from '@/components/technical-inquiry/DrillingForm';
+import TappingForm from '@/components/technical-inquiry/TappingForm';
+import EndMillForm from '@/components/technical-inquiry/EndMillForm';
+import { downloadTechnicalInquiryAsPdf, getDrillingInquiryHtml, getTappingInquiryHtml, getEndMillInquiryHtml } from '@/services/pdfService';
+import Modal from '@/components/common/Modal';
 import { useNavigate, useParams } from 'react-router-dom';
-// Fix: Removed unused and incorrect import of 'ViewState' which was causing an error.
 
 interface FormContainerProps {
     inquiryId?: string; // Can be 'create_{interviewId}' or a real inquiry ID

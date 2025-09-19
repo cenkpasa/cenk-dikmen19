@@ -1,8 +1,5 @@
 
 
-
-
-
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -12,10 +9,11 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { runAIAgent } from '../../services/aiAgentService';
 import { useNotificationCenter } from '../../contexts/NotificationCenterContext';
 import Loader from '../common/Loader';
-import { Page as PageType } from '../../types';
 import CommandPalette from '../common/CommandPalette';
 import { syncService } from '../../services/syncService';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 
+// Lazy load pages
 const LoginPage = React.lazy(() => import('../../pages/LoginPage'));
 const Dashboard = React.lazy(() => import('../../pages/Dashboard'));
 const Customers = React.lazy(() => import('../../pages/Customers'));
@@ -25,7 +23,6 @@ const OfferPage = React.lazy(() => import('../../pages/OfferPage'));
 const Users = React.lazy(() => import('../../pages/Users'));
 const CalculationToolsPage = React.lazy(() => import('../../pages/CalculationToolsPage'));
 const Profile = React.lazy(() => import('../../pages/Profile'));
-const EmailPage = React.lazy(() => import('../../pages/EmailPage'));
 const AIHubPage = React.lazy(() => import('../../pages/AIHubPage'));
 const LocationTrackingPage = React.lazy(() => import('../../pages/LocationTrackingPage'));
 const ErpIntegrationPage = React.lazy(() => import('../../pages/ErpIntegrationPage'));
@@ -36,43 +33,12 @@ const ReconciliationPage = React.lazy(() => import('../../pages/ReconciliationPa
 const AuditLogPage = React.lazy(() => import('../../pages/AuditLogPage'));
 const TechnicalInquiryPage = React.lazy(() => import('../../pages/TechnicalInquiryPage'));
 
-
-export type ViewState = {
-    page: PageType;
-    id?: string;
-};
-
-const PageContent = ({ view, setView }: { view: ViewState; setView: (view: ViewState) => void; }) => {
-    switch (view.page) {
-        case 'dashboard': return <Dashboard setView={setView} />;
-        case 'customers': return <Customers setView={setView} />;
-        case 'email': return <EmailPage />;
-        case 'appointments': return <Appointments />;
-        case 'gorusme-formu': return <InterviewFormPage setView={setView} view={view} />;
-        case 'teklif-yaz': return <OfferPage setView={setView} view={view} />;
-        case 'personnel': return <Users />;
-        case 'konum-takip': return <LocationTrackingPage />;
-        case 'hesaplama-araclari': return <CalculationToolsPage />;
-        case 'yapay-zeka': return <AIHubPage />;
-        // Fix: Removed setView prop as ErpIntegrationPage does not accept it.
-        case 'erp-entegrasyonu': return <ErpIntegrationPage />;
-        case 'profile': return <Profile />;
-        case 'ai-ayarlari': return <AISettingsPage />;
-        case 'raporlar': return <ReportPage />;
-        case 'email-taslaklari': return <EmailDraftsPage setView={setView} />;
-        case 'mutabakat': return <ReconciliationPage />;
-        case 'audit-log': return <AuditLogPage />;
-        case 'teknik-talepler': return <TechnicalInquiryPage view={view} setView={setView} />;
-        default: return <Dashboard setView={setView} />;
-    }
-};
-
 const App = () => {
     const { currentUser, loading } = useAuth();
     const { NotificationContainer } = useNotification();
-    const [view, setView] = useState<ViewState>({ page: 'dashboard' });
     const [isLeftSidebarOpen, setLeftSidebarOpen] = useState(false);
     const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+    const navigate = useNavigate();
 
     const { settings } = useSettings();
     const { addNotification } = useNotificationCenter();
@@ -109,7 +75,7 @@ const App = () => {
 
     useEffect(() => {
         const handleOnline = () => {
-            console.log("Bağlantı kuruldu. Bekleyen işlemler senkronize ediliyor...");
+            console.log("Connection established. Synchronizing pending operations...");
             syncService.processSyncQueue();
         };
         window.addEventListener('online', handleOnline);
@@ -144,21 +110,39 @@ const App = () => {
     return (
         <div className="app-container grid min-h-screen bg-cnk-bg-light text-cnk-txt-secondary-light md:grid-cols-[260px_1fr]">
             <NotificationContainer />
-            <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} executeCommand={executeCommand} setView={setView} />
+            <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} executeCommand={executeCommand} />
             
-            {/* Fix: Removed view and setView props as SidebarLeft does not use them. NavLink handles active state internally. */}
             <SidebarLeft isOpen={isLeftSidebarOpen} setIsOpen={setLeftSidebarOpen} />
             
             <div className="flex flex-col flex-grow min-w-0">
                 <Header 
-                    view={view} 
                     onToggleLeftSidebar={() => setLeftSidebarOpen(true)}
-                    setView={setView}
                 />
                 <main className="main-content flex-grow overflow-y-auto bg-cnk-bg-light p-4 md:p-6">
                      <div id="page-content" className="min-h-[calc(100vh-120px)]">
                         <Suspense fallback={<div className="flex justify-center items-center min-h-[calc(100vh-120px)]"><Loader /></div>}>
-                            <PageContent view={view} setView={setView} />
+                            <Routes>
+                                <Route path="/" element={<Dashboard />} />
+                                <Route path="/customers" element={<Customers />} />
+                                <Route path="/appointments" element={<Appointments />} />
+                                <Route path="/interviews" element={<InterviewFormPage />} />
+                                <Route path="/interviews/:id" element={<InterviewFormPage />} />
+                                <Route path="/offers" element={<OfferPage />} />
+                                <Route path="/offers/:id" element={<OfferPage />} />
+                                <Route path="/reconciliations" element={<ReconciliationPage />} />
+                                <Route path="/email-drafts" element={<EmailDraftsPage />} />
+                                <Route path="/ai-hub" element={<AIHubPage />} />
+                                <Route path="/reports" element={<ReportPage />} />
+                                <Route path="/audit-log" element={<AuditLogPage />} />
+                                <Route path="/personnel" element={<Users />} />
+                                <Route path="/location-tracking" element={<LocationTrackingPage />} />
+                                <Route path="/erp" element={<ErpIntegrationPage />} />
+                                <Route path="/calculators" element={<CalculationToolsPage />} />
+                                <Route path="/profile" element={<Profile />} />
+                                <Route path="/ai-settings" element={<AISettingsPage />} />
+                                <Route path="/technical-inquiries/:id" element={<TechnicalInquiryPage />} />
+                                <Route path="*" element={<Dashboard />} />
+                            </Routes>
                         </Suspense>
                     </div>
                 </main>

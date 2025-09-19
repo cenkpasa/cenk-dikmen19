@@ -1,7 +1,8 @@
+
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ViewState } from '@/App';
-import { Page } from '@/types';
+import { useNavigate } from 'react-router-dom';
 
 interface Command {
     id: string;
@@ -15,26 +16,26 @@ interface CommandPaletteProps {
     isOpen: boolean;
     onClose: () => void;
     executeCommand: (action: () => void) => void;
-    setView: (view: ViewState) => void;
 }
 
-const CommandPalette = ({ isOpen, onClose, executeCommand, setView }: CommandPaletteProps) => {
+const CommandPalette = ({ isOpen, onClose, executeCommand }: CommandPaletteProps) => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [activeIndex, setActiveIndex] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
     const resultsRef = useRef<HTMLUListElement>(null);
     
     const allCommands: Command[] = useMemo(() => [
-        { id: 'go_dashboard', title: t('dashboard'), icon: 'fa-tachometer-alt', action: () => setView({ page: 'dashboard' }) },
-        { id: 'go_customers', title: t('customerList'), icon: 'fa-users', keywords: 'müşteri cari', action: () => setView({ page: 'customers' }) },
-        { id: 'go_appointments', title: t('appointmentsTitle'), icon: 'fa-calendar-check', keywords: 'randevu takvim', action: () => setView({ page: 'appointments' }) },
-        { id: 'go_offers', title: t('offerManagement'), icon: 'fa-file-invoice-dollar', keywords: 'teklif', action: () => setView({ page: 'teklif-yaz' }) },
-        { id: 'create_offer', title: `${t('createOffer')}`, icon: 'fa-plus', action: () => setView({ page: 'teklif-yaz', id: 'create'}) },
+        { id: 'go_dashboard', title: t('dashboard'), icon: 'fa-tachometer-alt', action: () => navigate('/') },
+        { id: 'go_customers', title: t('customerList'), icon: 'fa-users', keywords: 'müşteri cari', action: () => navigate('/customers') },
+        { id: 'go_appointments', title: t('appointmentsTitle'), icon: 'fa-calendar-check', keywords: 'randevu takvim', action: () => navigate('/appointments') },
+        { id: 'go_offers', title: t('offerManagement'), icon: 'fa-file-invoice-dollar', keywords: 'teklif', action: () => navigate('/offers') },
+        { id: 'create_offer', title: `${t('createOffer')}`, icon: 'fa-plus', action: () => navigate('/offers/create') },
         { id: 'create_customer', title: `${t('addNewCustomer')}`, icon: 'fa-plus', action: () => { /* This would require a global modal context or similar */ alert('Bu özellik yakında!'); } },
-        { id: 'go_reports', title: t('reports'), icon: 'fa-chart-line', action: () => setView({ page: 'raporlar' }) },
-        { id: 'go_profile', title: t('profileTitle'), icon: 'fa-user', action: () => setView({ page: 'profile' }) },
-    ], [t, setView]);
+        { id: 'go_reports', title: t('reports'), icon: 'fa-chart-line', action: () => navigate('/reports') },
+        { id: 'go_profile', title: t('profileTitle'), icon: 'fa-user', action: () => navigate('/profile') },
+    ], [t, navigate]);
 
     const filteredCommands = useMemo(() => {
         if (!searchTerm) return allCommands;

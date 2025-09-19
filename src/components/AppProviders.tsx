@@ -1,68 +1,42 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import App from '@/components/App';
+import { BrowserRouter } from 'react-router-dom';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+import { NotificationCenterProvider } from '@/contexts/NotificationCenterContext';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { SettingsProvider } from '@/contexts/SettingsContext';
 import { DataProvider } from '@/contexts/DataContext';
 import { ErpProvider } from '@/contexts/ErpContext';
 import { PersonnelProvider } from '@/contexts/PersonnelContext';
-import { NotificationCenterProvider } from '@/contexts/NotificationCenterContext';
-import { SettingsProvider } from '@/contexts/SettingsContext';
 import { ReconciliationProvider } from '@/contexts/ReconciliationContext';
-import { seedDatabase } from '@/services/dbService';
-import Loader from '@/components/common/Loader';
 
-const queryClient = new QueryClient();
+const qc = new QueryClient();
 
-export const AppProviders = () => {
-    const [isInitialized, setIsInitialized] = useState(false);
-    const initialized = useRef(false);
-
-    useEffect(() => {
-        if (initialized.current) return;
-        initialized.current = true;
-
-        const initialize = async () => {
-            try {
-                await seedDatabase();
-            } catch (error) {
-                console.error("Database seeding failed:", error);
-            } finally {
-                setIsInitialized(true);
-            }
-        };
-        initialize();
-    }, []);
-
-    if (!isInitialized) {
-        return <Loader fullScreen={true} />;
-    }
-    
-    return (
-        <BrowserRouter>
-            <QueryClientProvider client={queryClient}>
-                <LanguageProvider>
-                    <NotificationProvider>
-                        <AuthProvider>
-                            <SettingsProvider>
-                                <NotificationCenterProvider>
-                                    <DataProvider>
-                                        <ErpProvider>
-                                            <PersonnelProvider>
-                                                <ReconciliationProvider>
-                                                    <App />
-                                                </ReconciliationProvider>
-                                            </PersonnelProvider>
-                                        </ErpProvider>
-                                    </DataProvider>
-                                </NotificationCenterProvider>
-                            </SettingsProvider>
-                        </AuthProvider>
-                    </NotificationProvider>
-                </LanguageProvider>
-            </QueryClientProvider>
-        </BrowserRouter>
-    );
-};
+export default function AppProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={qc}>
+        <LanguageProvider>
+          <NotificationProvider>
+            <NotificationCenterProvider>
+              <AuthProvider>
+                <SettingsProvider>
+                  <DataProvider>
+                    <ErpProvider>
+                      <PersonnelProvider>
+                        <ReconciliationProvider>
+                          {children}
+                        </ReconciliationProvider>
+                      </PersonnelProvider>
+                    </ErpProvider>
+                  </DataProvider>
+                </SettingsProvider>
+              </AuthProvider>
+            </NotificationCenterProvider>
+          </NotificationProvider>
+        </LanguageProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+}

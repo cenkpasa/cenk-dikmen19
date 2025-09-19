@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotification } from '@/contexts/NotificationContext';
@@ -110,8 +111,8 @@ const App = () => {
     return (
         <div className="app-container grid min-h-screen bg-cnk-bg-light text-cnk-txt-secondary-light md:grid-cols-[260px_1fr]">
             <NotificationContainer />
-            {/* Fix: Updated setView to navigate using react-router-dom paths */}
-            <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} executeCommand={executeCommand} setView={(view) => navigate(view.id ? `/${view.page}/${view.id}` : `/${view.page}`)} />
+            {/* Fix: Removed setView prop from CommandPalette, which now handles navigation internally. */}
+            <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} executeCommand={executeCommand} />
             
             <SidebarLeft isOpen={isLeftSidebarOpen} setIsOpen={setLeftSidebarOpen} />
             

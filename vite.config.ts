@@ -11,7 +11,4 @@ export default defineConfig({
     },
     dedupe: ['react', 'react-dom'],
   },
-  optimizeDeps: { 
-    include: ['react', 'react-dom'] 
-  },
 });
