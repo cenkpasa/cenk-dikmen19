@@ -1,11 +1,12 @@
 import { api } from './apiService';
-import { Stok, Fatura, CariHareket, Teklif, ExchangeRate } from '@/types';
+// Fix: Corrected type from Stok to StokOgeleri
+import { StokOgeleri, Fatura, CariHareket, Teklif, ExchangeRate } from '@/types';
 
 export async function triggerSync() {
     await api.post('/sync');
 }
 
-export async function getStocks(): Promise<Stok[]> {
+export async function getStocks(): Promise<StokOgeleri[]> {
     const { data } = await api.get('/data/stok');
     return data;
 }

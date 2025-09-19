@@ -1,43 +1,41 @@
 
-
-
-
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { ViewState } from '../ai/App';
 import NotificationBell from './NotificationBell';
 import CnkLogo from '../assets/CnkLogo';
+import { useLocation } from 'react-router-dom';
 
 interface HeaderProps {
-    view: ViewState;
-    setView: (view: ViewState) => void;
     onToggleLeftSidebar: () => void;
 }
 
-const Header = ({ view, setView, onToggleLeftSidebar }: HeaderProps) => {
+const Header = ({ onToggleLeftSidebar }: HeaderProps) => {
     const { t } = useLanguage();
+    const location = useLocation();
 
     const PAGE_TITLES: Record<string, string> = {
-        'dashboard': 'dashboard',
-        'customers': 'customerList',
-        'email': 'emailTitle',
-        'appointments': 'appointmentsTitle',
-        'gorusme-formu': 'interviewFormsTitle',
-        'teklif-yaz': 'offerManagement',
-        'personnel': 'personnelManagement',
-        'hesaplama-araclari': 'calculationTools',
-        'profile': 'profileTitle',
-        'yapay-zeka': 'aiHubTitle',
-        'konum-takip': 'locationTracking',
-        'erp-entegrasyonu': 'erpIntegration',
-        'ai-ayarlari': 'aiSettings',
-        'raporlar': 'reports',
-        'email-taslaklari': 'emailDrafts',
-        'mutabakat': 'mutabakat',
-        'audit-log': 'auditLog',
+        '/': 'dashboard',
+        '/customers': 'customerList',
+        '/appointments': 'appointmentsTitle',
+        '/interviews': 'interviewFormsTitle',
+        '/offers': 'offerManagement',
+        '/personnel': 'personnelManagement',
+        '/calculators': 'calculationTools',
+        '/profile': 'profileTitle',
+        '/ai-hub': 'aiHubTitle',
+        '/location-tracking': 'locationTracking',
+        '/erp': 'erpIntegration',
+        '/ai-settings': 'aiSettings',
+        '/reports': 'reports',
+        '/email-drafts': 'emailDrafts',
+        '/reconciliations': 'reconciliation',
+        '/audit-log': 'auditLog',
+        '/technical-inquiries': 'technicalInquiries',
     };
     
-    const pageTitleKey = PAGE_TITLES[view.page] || 'dashboard';
+    // Match base path, e.g., /interviews/123 should match /interviews
+    const pagePath = '/' + location.pathname.split('/')[1];
+    const pageTitleKey = PAGE_TITLES[pagePath] || 'dashboard';
 
     return (
         <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-cnk-border-light bg-cnk-panel-light px-4 md:px-6">
@@ -55,7 +53,7 @@ const Header = ({ view, setView, onToggleLeftSidebar }: HeaderProps) => {
             </div>
 
             <div className="flex items-center gap-4">
-                <NotificationBell setView={setView}/>
+                <NotificationBell />
             </div>
         </header>
     );

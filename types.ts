@@ -501,6 +501,19 @@ export interface StokOgeleri {
   kdv?: number | null; // ERP: vatRate/Kdv
 }
 
+// Fix: Add missing StockItem type for ERP mock data.
+export interface StockItem {
+    id?: string;
+    erpId: string;
+    sku: string;
+    name: string;
+    barcode?: string;
+    unit?: string;
+    price?: number;
+    isActive: boolean;
+    lastSync?: string;
+}
+
 // ERP-specific types from patch
 export type CariHareket = { cariCode: string; date: string; docNo?: string | null; debt?: number | null; credit?: number | null; balance?: number | null; };
 export type Teklif = { quoteNo: string; date: string; cariCode?: string; total?: number | null; };

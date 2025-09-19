@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotification } from '@/contexts/NotificationContext';
@@ -10,7 +9,7 @@ import { useNotificationCenter } from '@/contexts/NotificationCenterContext';
 import Loader from '@/components/common/Loader';
 import CommandPalette from '@/components/common/CommandPalette';
 import { syncService } from '@/services/syncService';
-import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 
 // Lazy load pages
 const LoginPage = React.lazy(() => import('@/pages/LoginPage'));
@@ -110,7 +109,6 @@ const App = () => {
     return (
         <div className="app-container grid min-h-screen bg-cnk-bg-light text-cnk-txt-secondary-light md:grid-cols-[260px_1fr]">
             <NotificationContainer />
-            {/* Fix: Updated setView to navigate using react-router-dom paths */}
             <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} executeCommand={executeCommand} setView={(view) => navigate(view.id ? `/${view.page}/${view.id}` : `/${view.page}`)} />
             
             <SidebarLeft isOpen={isLeftSidebarOpen} setIsOpen={setLeftSidebarOpen} />

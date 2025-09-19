@@ -2,28 +2,54 @@
 import React from 'react';
 import { useNotificationCenter } from '@/contexts/NotificationCenterContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Notification } from '@/types';
-import { ViewState } from '@/App';
+import { Notification, Page } from '@/types';
 import Button from '@/components/common/Button';
+import { useNavigate } from 'react-router-dom';
 
 interface NotificationPanelProps {
-    setView: (view: ViewState) => void;
     onClose: () => void;
 }
 
-const NotificationPanel = ({ setView, onClose }: NotificationPanelProps) => {
+const NotificationPanel = ({ onClose }: NotificationPanelProps) => {
     const { notifications, markAsRead, markAllAsRead } = useNotificationCenter();
     const { t } = useLanguage();
+    const navigate = useNavigate();
+
+    // Fix: Add map from Page type to router path
+    const pageToPathMap: Record<Page, string> = {
+        'dashboard': '/',
+        'customers': '/customers',
+        'email': '/email', // Assuming a route, though not present in App.tsx
+        'appointments': '/appointments',
+        'gorusme-formu': '/interviews',
+        'teklif-yaz': '/offers',
+        'personnel': '/personnel',
+        'hesaplama-araclari': '/calculators',
+        'profile': '/profile',
+        'yapay-zeka': '/ai-hub',
+        'konum-takip': '/location-tracking',
+        'erp-entegrasyonu': '/erp',
+        'ai-ayarlari': '/ai-settings',
+        'raporlar': '/reports',
+        'email-taslaklari': '/email-drafts',
+        'mutabakat': '/reconciliations',
+        'audit-log': '/audit-log',
+        'teknik-talepler': '/technical-inquiries',
+    };
 
     const handleNotificationClick = (notification: Notification) => {
         if (!notification.isRead) {
             markAsRead(notification.id);
         }
         if (notification.link) {
-            setView({ page: notification.link.page, id: notification.link.id });
+            // Fix: Navigate using react-router-dom
+            const basePath = pageToPathMap[notification.link.page] || '/';
+            const path = notification.link.id ? `${basePath}/${notification.link.id}` : basePath;
+            navigate(path);
         }
         onClose();
     };
+
 
     const getIconForType = (type: Notification['type']) => {
         const iconMap = {

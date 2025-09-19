@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -6,19 +7,19 @@ import { useAuth } from '../contexts/AuthContext';
 import { Interview, Customer } from '../types';
 import DataTable from '../components/common/DataTable';
 import Button from '../components/common/Button';
-import { ViewState } from '../components/App';
 import BworksLogo from '../components/assets/BworksLogo';
 import VoiceNoteModal from '../components/ai/VoiceNoteModal';
 import Autocomplete from '../components/common/Autocomplete';
 import { downloadInterviewAsPdf, getInterviewHtml } from '../services/pdfService';
 import { formatDate } from '../utils/formatting';
 import CustomerForm from '../components/forms/CustomerForm';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface InterviewListPageProps {
-    setView: (view: ViewState) => void;
+    onNavigate: (path: string) => void;
 }
 
-const InterviewListPage = ({ setView }: InterviewListPageProps) => {
+const InterviewListPage = ({ onNavigate }: InterviewListPageProps) => {
     const { interviews, customers } = useData();
     const { t } = useLanguage();
     const { currentUser } = useAuth();
@@ -37,7 +38,7 @@ const InterviewListPage = ({ setView }: InterviewListPageProps) => {
             header: t('actions'),
             accessor: (item: Interview) => (
                 <div className="flex gap-2">
-                    <Button variant="info" size="sm" onClick={() => setView({ page: 'gorusme-formu', id: item.id })} icon="fas fa-eye" title={currentUser?.role === 'admin' ? `${t('view')}/${t('edit')}` : t('view')} />
+                    <Button variant="info" size="sm" onClick={() => onNavigate(`/interviews/${item.id}`)} icon="fas fa-eye" title={currentUser?.role === 'admin' ? `${t('view')}/${t('edit')}` : t('view')} />
                 </div>
             ),
         },
@@ -47,7 +48,7 @@ const InterviewListPage = ({ setView }: InterviewListPageProps) => {
         <div>
             <div className="flex items-center justify-between mb-6">
                  <h1 className="text-2xl font-bold">{t('interviewFormsTitle')}</h1>
-                <Button variant="primary" onClick={() => setView({ page: 'gorusme-formu', id: 'create' })} icon="fas fa-plus">{t('addInterview')}</Button>
+                <Button variant="primary" onClick={() => onNavigate('/interviews/create')} icon="fas fa-plus">{t('addInterview')}</Button>
             </div>
             <DataTable
                 columns={columns}
@@ -64,15 +65,15 @@ const SEKTOR_OPTIONS = [
 ];
 
 interface InterviewFormProps {
-    setView: (view: ViewState) => void;
     interviewId?: string;
 }
 
-const InterviewForm = ({ setView, interviewId }: InterviewFormProps) => {
+const InterviewForm = ({ interviewId }: InterviewFormProps) => {
     const { interviews, customers, addCustomer, addInterview, updateInterview, technicalInquiries } = useData();
     const { t } = useLanguage();
     const { currentUser } = useAuth();
     const { showNotification } = useNotification();
+    const navigate = useNavigate();
     
     const isCreateMode = interviewId === 'create';
     const isReadOnly = !isCreateMode && currentUser?.role !== 'admin';
@@ -180,7 +181,7 @@ const InterviewForm = ({ setView, interviewId }: InterviewFormProps) => {
             updateInterview({ ...existingInterview, ...formState });
             showNotification('interviewUpdated', 'success');
         }
-        setView({ page: 'gorusme-formu' });
+        navigate('/interviews');
     };
 
     const handleDownloadPdf = async () => {
@@ -209,7 +210,7 @@ const InterviewForm = ({ setView, interviewId }: InterviewFormProps) => {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">{isCreateMode ? t('addInterview') : t('interviewForm')}</h1>
                  <div className="flex gap-2">
-                    <Button onClick={() => setView({ page: 'gorusme-formu' })} variant="secondary" icon="fas fa-arrow-left">{t('backToList')}</Button>
+                    <Button onClick={() => navigate('/interviews')} variant="secondary" icon="fas fa-arrow-left">{t('backToList')}</Button>
                 </div>
             </div>
             
@@ -285,7 +286,7 @@ const InterviewForm = ({ setView, interviewId }: InterviewFormProps) => {
                         <h2 className="text-xl font-bold">{t('linkedTechnicalInquiries')}</h2>
                         {!isReadOnly && (
                             <Button
-                                onClick={() => setView({ page: 'teknik-talepler', id: `create_${interviewId}` })}
+                                onClick={() => navigate(`/technical-inquiries/create_${interviewId}`)}
                                 icon="fas fa-plus"
                             >
                                 {t('createTechnicalInquiry')}
@@ -299,7 +300,7 @@ const InterviewForm = ({ setView, interviewId }: InterviewFormProps) => {
                                 { header: 'Tür', accessor: (item) => t(item.type) },
                                 { header: 'Tarih', accessor: (item) => formatDate(item.createdAt) },
                                 { header: t('actions'), accessor: (item) => (
-                                    <Button size="sm" variant="secondary" onClick={() => setView({ page: 'teknik-talepler', id: item.id })}>
+                                    <Button size="sm" variant="secondary" onClick={() => navigate(`/technical-inquiries/${item.id}`)}>
                                         {t('view')}
                                     </Button>
                                 )}
@@ -317,23 +318,14 @@ const InterviewForm = ({ setView, interviewId }: InterviewFormProps) => {
     );
 };
 
-interface InterviewFormPageProps {
-    view: ViewState;
-    setView: (view: ViewState) => void;
-}
+const InterviewFormPage = () => {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
 
-const InterviewFormPage = ({ view, setView }: InterviewFormPageProps) => {
-    // This state management fix ensures the form resets correctly
-    const [formKey, setFormKey] = useState(view.id || 'list');
-    
-    useEffect(() => {
-        setFormKey(view.id || 'list');
-    }, [view.id]);
-
-    if (view.id) {
-        return <InterviewForm key={formKey} setView={setView} interviewId={view.id} />;
+    if (id) {
+        return <InterviewForm interviewId={id} />;
     }
-    return <InterviewListPage setView={setView} />;
+    return <InterviewListPage onNavigate={navigate} />;
 };
 
 export default InterviewFormPage;

@@ -1,16 +1,14 @@
+
 import React from 'react';
 import { useNotificationCenter } from '@/contexts/NotificationCenterContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ViewState } from '@/App';
-import { Notification } from '@/types';
+import { Notification, Page } from '@/types';
+import { useNavigate } from 'react-router-dom';
 
-interface LatestActivityProps {
-    setView: (view: ViewState) => void;
-}
-
-const LatestActivity = ({ setView }: LatestActivityProps) => {
+const LatestActivity = () => {
     const { t } = useLanguage();
     const { notifications, markAsRead } = useNotificationCenter();
+    const navigate = useNavigate();
 
     const latestActivities = notifications.slice(0, 5);
 
@@ -26,12 +24,37 @@ const LatestActivity = ({ setView }: LatestActivityProps) => {
         return iconMap[type] || iconMap.system;
     };
 
+    // Fix: Add map from Page type to router path
+    const pageToPathMap: Record<Page, string> = {
+        'dashboard': '/',
+        'customers': '/customers',
+        'email': '/email',
+        'appointments': '/appointments',
+        'gorusme-formu': '/interviews',
+        'teklif-yaz': '/offers',
+        'personnel': '/personnel',
+        'hesaplama-araclari': '/calculators',
+        'profile': '/profile',
+        'yapay-zeka': '/ai-hub',
+        'konum-takip': '/location-tracking',
+        'erp-entegrasyonu': '/erp',
+        'ai-ayarlari': '/ai-settings',
+        'raporlar': '/reports',
+        'email-taslaklari': '/email-drafts',
+        'mutabakat': '/reconciliations',
+        'audit-log': '/audit-log',
+        'teknik-talepler': '/technical-inquiries',
+    };
+
     const handleActivityClick = (notification: Notification) => {
         if (notification.link) {
             if (!notification.isRead) {
                 markAsRead(notification.id);
             }
-            setView({ page: notification.link.page, id: notification.link.id });
+            // Fix: Navigate using react-router-dom
+            const basePath = pageToPathMap[notification.link.page] || '/';
+            const path = notification.link.id ? `${basePath}/${notification.link.id}` : basePath;
+            navigate(path);
         }
     };
 

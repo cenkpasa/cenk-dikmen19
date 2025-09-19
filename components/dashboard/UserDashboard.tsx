@@ -1,19 +1,15 @@
 
-
-
-
 import React, { useMemo } from 'react';
 import StatCard from '@/components/dashboard/StatCard';
 import LatestActivity from '@/components/dashboard/LatestActivity';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ViewState } from '@/App';
 import { useErp } from '@/contexts/ErpContext';
 import PersonalGoalTracker from '@/components/dashboard/PersonalGoalTracker';
 // import UpcomingAppointments from './UpcomingAppointments'; // This can be a future component
 
-const UserDashboard = ({ setView }: { setView: (view: ViewState) => void; }) => {
+const UserDashboard = () => {
     const { currentUser } = useAuth();
     const { appointments } = useData();
     const { faturalar } = useErp();
@@ -59,7 +55,7 @@ const UserDashboard = ({ setView }: { setView: (view: ViewState) => void; }) => 
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-3">
-                    <LatestActivity setView={setView} />
+                    <LatestActivity />
                 </div>
             </div>
         </div>

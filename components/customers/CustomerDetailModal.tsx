@@ -1,7 +1,4 @@
 
-
-
-
 import React, { useState, useMemo } from 'react';
 import { Customer, Reconciliation, Fatura } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,7 +8,6 @@ import { useNotification } from '@/contexts/NotificationContext';
 import Modal from '@/components/common/Modal';
 import Button from '@/components/common/Button';
 import ActivityTimeline from '@/components/customers/ActivityTimeline';
-import { ViewState } from '@/App';
 import Loader from '@/components/common/Loader';
 import { useErp } from '@/contexts/ErpContext';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -19,6 +15,7 @@ import { db } from '@/services/dbService';
 import DataTable from '@/components/common/DataTable';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency } from '@/utils/formatting';
+import { useNavigate } from 'react-router-dom';
 
 
 interface CustomerDetailModalProps {
@@ -26,7 +23,6 @@ interface CustomerDetailModalProps {
     onClose: () => void;
     customer: Customer;
     onEdit: (customer: Customer) => void;
-    setView: (view: ViewState) => void;
 }
 
 const InfoItem = ({ label, value }: { label: string, value?: string }) => {
@@ -64,13 +60,14 @@ const AIAnalysisSection = ({ title, icon, analysisData, onRun, isLoading }: { ti
 };
 
 
-const CustomerDetailModal = ({ isOpen, onClose, customer, onEdit, setView }: CustomerDetailModalProps) => {
+const CustomerDetailModal = ({ isOpen, onClose, customer, onEdit }: CustomerDetailModalProps) => {
     const { t } = useLanguage();
     const { updateCustomer } = useData();
     const { faturalar } = useErp();
     const reconciliations = useLiveQuery(() => db.reconciliations.where('customerId').equals(customer.id).toArray(), [customer.id]) || [];
     const { showNotification } = useNotification();
     const { currentUser } = useAuth();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'timeline' | 'ai' | 'invoices' | 'reconciliations'>('timeline');
     const [loadingAI, setLoadingAI] = useState<Record<string, boolean>>({
         opportunity: false,
@@ -88,7 +85,7 @@ const CustomerDetailModal = ({ isOpen, onClose, customer, onEdit, setView }: Cus
 
     const handleCreateAppointment = () => {
         onClose();
-        setView({ page: 'appointments' });
+        navigate('/appointments');
     };
     
     const handleRunAnalysis = async (type: 'opportunity' | 'nextStep' | 'sentiment') => {

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, ChangeEvent } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -8,7 +9,6 @@ import DataTable from '../components/common/DataTable';
 import Button from '../components/common/Button';
 import { downloadOfferAsPdf, getOfferHtml } from '../services/pdfService';
 import Loader from '../components/common/Loader';
-import { ViewState } from '../App';
 import Modal from '../components/common/Modal';
 import { v4 as uuidv4 } from 'uuid';
 import Autocomplete from '../components/common/Autocomplete';
@@ -18,18 +18,14 @@ import CustomerForm from '../components/forms/CustomerForm';
 import { generateFollowUpEmail } from '../services/aiService';
 import { db } from '../services/dbService';
 import Input from '../components/common/Input';
+import { useNavigate, useParams } from 'react-router-dom';
 
-
-interface OfferPageProps {
-    view: ViewState;
-    setView: (view: ViewState) => void;
-}
 
 interface OfferListPageProps {
-    setView: (view: ViewState) => void;
+    onNavigate: (path: string) => void;
 }
 
-const OfferListPage = ({ setView }: OfferListPageProps) => {
+const OfferListPage = ({ onNavigate }: OfferListPageProps) => {
     const { offers, customers } = useData();
     const { t } = useLanguage();
     const [isDownloading, setIsDownloading] = useState(false);
@@ -41,17 +37,15 @@ const OfferListPage = ({ setView }: OfferListPageProps) => {
         const customer = customers.find(c => c.id === offer.customerId);
         const result = await downloadOfferAsPdf(offer, customer, t);
         if (result.success) {
-            // Fix: Corrected arguments for showNotification.
             showNotification('pdfDownloaded', 'success');
         } else {
-            // Fix: Corrected arguments for showNotification.
             showNotification('pdfError', 'error');
         }
         setIsDownloading(false);
     };
 
     const columns = [
-        { header: t('offerCode'), accessor: (item: Offer) => <a onClick={() => setView({ page: 'teklif-yaz', id: item.id })} className="font-mono text-sm text-cnk-accent-primary hover:underline cursor-pointer">{item.teklifNo}</a> },
+        { header: t('offerCode'), accessor: (item: Offer) => <a onClick={() => onNavigate(`/offers/${item.id}`)} className="font-mono text-sm text-cnk-accent-primary hover:underline cursor-pointer">{item.teklifNo}</a> },
         { 
             header: t('customers'), 
             accessor: (item: Offer) => customers.find(c => c.id === item.customerId)?.name || t('unknownCustomer')
@@ -63,8 +57,7 @@ const OfferListPage = ({ setView }: OfferListPageProps) => {
             header: t('actions'),
             accessor: (item: Offer) => (
                 <div className="flex gap-2">
-                    {/* Fix: Replaced NavLink with Button to match app's view state navigation */}
-                    <Button onClick={() => setView({ page: 'teklif-yaz', id: item.id })} variant="info" size="sm" icon="fas fa-eye" title={currentUser?.role === 'admin' ? `${t('view')}/${t('edit')}` : t('view')} />
+                    <Button onClick={() => onNavigate(`/offers/${item.id}`)} variant="info" size="sm" icon="fas fa-eye" title={currentUser?.role === 'admin' ? `${t('view')}/${t('edit')}` : t('view')} />
                     <Button variant="primary" size="sm" onClick={() => handleDownload(item)} icon="fas fa-file-pdf" title={t('downloadPdf')} />
                 </div>
             ),
@@ -76,8 +69,7 @@ const OfferListPage = ({ setView }: OfferListPageProps) => {
             {isDownloading && <Loader fullScreen={true} />}
              <div className="flex items-center justify-between mb-6">
                  <h1 className="text-2xl font-bold">{t('offerManagement')}</h1>
-                 {/* Fix: Replaced NavLink with Button to match app's view state navigation */}
-                 <Button onClick={() => setView({ page: 'teklif-yaz', id: 'create' })} variant="primary" icon="fas fa-plus">{t('createOffer')}</Button>
+                 <Button onClick={() => onNavigate('/offers/create')} variant="primary" icon="fas fa-plus">{t('createOffer')}</Button>
             </div>
             <DataTable
                 columns={columns}
@@ -120,7 +112,6 @@ const AIEmailModal = ({ isOpen, onClose, offer, customer, initialBody, initialSu
         };
 
         await db.emailDrafts.add(newDraft);
-        // Fix: Corrected arguments for showNotification.
         showNotification('emailSaved', 'success');
         onClose();
     };
@@ -157,15 +148,15 @@ const AIEmailModal = ({ isOpen, onClose, offer, customer, initialBody, initialSu
 };
 
 interface OfferFormProps {
-    setView: (view: ViewState) => void;
     offerId?: string;
 }
 
-const OfferForm = ({ setView, offerId }: OfferFormProps) => {
+const OfferForm = ({ offerId }: OfferFormProps) => {
     const { t } = useLanguage();
     const { offers, customers, addOffer, updateOffer } = useData();
     const { currentUser } = useAuth();
     const { showNotification } = useNotification();
+    const navigate = useNavigate();
     
     const isCreateMode = offerId === 'create';
     const isReadOnly = !isCreateMode && currentUser?.role !== 'admin';
@@ -268,7 +259,6 @@ const OfferForm = ({ setView, offerId }: OfferFormProps) => {
     
     const handleSubmit = () => {
         if(!formState.customerId || formState.items.length === 0) {
-            // Fix: Corrected arguments for showNotification.
             showNotification('fieldsRequired', 'error');
             return;
         }
@@ -283,16 +273,14 @@ const OfferForm = ({ setView, offerId }: OfferFormProps) => {
 
         if (isCreateMode) {
             addOffer(offerData);
-            // Fix: Corrected arguments for showNotification.
             showNotification('offerAdded', 'success');
         } else if (offerId) {
             const existingOffer = offers.find(o => o.id === offerId)!;
             updateOffer({ ...existingOffer, ...offerData });
-            // Fix: Corrected arguments for showNotification.
             showNotification('offerUpdated', 'success');
         }
 
-        setView({ page: 'teklif-yaz' });
+        navigate('/offers');
     };
 
     const handleGenerateEmail = async () => {
@@ -313,7 +301,6 @@ const OfferForm = ({ setView, offerId }: OfferFormProps) => {
             });
             setIsEmailModalOpen(true);
         } else {
-            // Fix: Corrected arguments for showNotification.
             showNotification('aiError', 'error');
         }
     };
@@ -328,8 +315,7 @@ const OfferForm = ({ setView, offerId }: OfferFormProps) => {
         <div className="max-w-5xl mx-auto">
             {isNewCustomerModalOpen && <CustomerForm isOpen={isNewCustomerModalOpen} onClose={() => setIsNewCustomerModalOpen(false)} customer={null}/>}
             <div className="flex justify-end items-center mb-6">
-                 {/* Fix: Replaced NavLink with Button to match app's view state navigation */}
-                 <Button onClick={() => setView({ page: 'teklif-yaz' })} variant="secondary" icon="fas fa-arrow-left">{t('backToList')}</Button>
+                 <Button onClick={() => navigate('/offers')} variant="secondary" icon="fas fa-arrow-left">{t('backToList')}</Button>
             </div>
             
             <fieldset disabled={isReadOnly} className="border-2 border-cnk-border-light p-6 disabled:bg-slate-50">
@@ -438,12 +424,14 @@ const OfferForm = ({ setView, offerId }: OfferFormProps) => {
     );
 };
 
-// Fix: Added missing OfferPage component to handle view routing and resolve export error.
-const OfferPage = ({ view, setView }: OfferPageProps) => {
-    if (view.id) {
-        return <OfferForm setView={setView} offerId={view.id} />;
+const OfferPage = () => {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+
+    if (id) {
+        return <OfferForm offerId={id} />;
     }
-    return <OfferListPage setView={setView} />;
+    return <OfferListPage onNavigate={navigate} />;
 };
 
 export default OfferPage;

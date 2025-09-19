@@ -1,7 +1,4 @@
 
-
-
-
 import React, { useMemo } from 'react';
 import StatCard from '@/components/dashboard/StatCard';
 import BarChart from '@/components/dashboard/BarChart';
@@ -10,13 +7,12 @@ import TopSalesDonut from '@/components/dashboard/TopSalesDonut';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ViewState } from '@/App';
 import AIInsightCenter from '@/components/dashboard/AIInsightCenter';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/services/dbService';
 import ExchangeRateCard from './ExchangeRateCard';
 
-const AdminDashboard = ({ setView }: { setView: (view: ViewState) => void; }) => {
+const AdminDashboard = () => {
     const { customers, appointments } = useData();
     const { users } = useAuth();
     const { t } = useLanguage();
@@ -43,12 +39,12 @@ const AdminDashboard = ({ setView }: { setView: (view: ViewState) => void; }) =>
             {/* Charts & AI */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 shadow-md rounded-cnk-card"><BarChart /></div>
-                <div className="lg:col-span-1 shadow-md rounded-cnk-card"><AIInsightCenter setView={setView} /></div>
+                <div className="lg:col-span-1 shadow-md rounded-cnk-card"><AIInsightCenter /></div>
             </div>
             
             {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 shadow-md rounded-cnk-card"><LatestActivity setView={setView} /></div>
+                <div className="lg:col-span-2 shadow-md rounded-cnk-card"><LatestActivity /></div>
                 <div className="lg:col-span-1 shadow-md rounded-cnk-card"><TopSalesDonut /></div>
             </div>
         </div>

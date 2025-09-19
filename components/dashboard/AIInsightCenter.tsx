@@ -1,15 +1,17 @@
+
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotificationCenter } from '@/contexts/NotificationCenterContext';
-import { ViewState } from '@/App';
-import { Notification } from '@/types';
+import { Notification, Page } from '@/types';
+import { useNavigate } from 'react-router-dom';
 
-interface AIInsightCenterProps {
-    setView: (view: ViewState) => void;
+interface InsightCardProps {
+    insight: Notification;
 }
 
-const InsightCard = ({ insight, setView }: { insight: Notification, setView: (view: ViewState) => void }) => {
+const InsightCard = ({ insight }: InsightCardProps) => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
     
     const iconMap = {
         offer: 'fas fa-lightbulb',
@@ -27,9 +29,34 @@ const InsightCard = ({ insight, setView }: { insight: Notification, setView: (vi
 
     const cardColor = colorMap[insight.type as keyof typeof colorMap] || colorMap.default;
 
+    // Fix: Add map from Page type to router path
+    const pageToPathMap: Record<Page, string> = {
+        'dashboard': '/',
+        'customers': '/customers',
+        'email': '/email',
+        'appointments': '/appointments',
+        'gorusme-formu': '/interviews',
+        'teklif-yaz': '/offers',
+        'personnel': '/personnel',
+        'hesaplama-araclari': '/calculators',
+        'profile': '/profile',
+        'yapay-zeka': '/ai-hub',
+        'konum-takip': '/location-tracking',
+        'erp-entegrasyonu': '/erp',
+        'ai-ayarlari': '/ai-settings',
+        'raporlar': '/reports',
+        'email-taslaklari': '/email-drafts',
+        'mutabakat': '/reconciliations',
+        'audit-log': '/audit-log',
+        'teknik-talepler': '/technical-inquiries',
+    };
+
     const handleAction = () => {
         if (insight.link) {
-            setView(insight.link);
+            // Fix: Navigate using react-router-dom
+            const basePath = pageToPathMap[insight.link.page] || '/';
+            const path = insight.link.id ? `${basePath}/${insight.link.id}` : basePath;
+            navigate(path);
         }
     };
 
@@ -51,7 +78,7 @@ const InsightCard = ({ insight, setView }: { insight: Notification, setView: (vi
 };
 
 
-const AIInsightCenter = ({ setView }: AIInsightCenterProps) => {
+const AIInsightCenter = () => {
     const { t } = useLanguage();
     const { notifications } = useNotificationCenter();
     const aiInsights = notifications.filter(n => !n.isRead);
@@ -65,7 +92,7 @@ const AIInsightCenter = ({ setView }: AIInsightCenterProps) => {
             {aiInsights.length > 0 ? (
                 <div className="space-y-3 overflow-y-auto flex-grow pr-2">
                     {aiInsights.map(insight => (
-                        <InsightCard key={insight.id} insight={insight} setView={setView} />
+                        <InsightCard key={insight.id} insight={insight} />
                     ))}
                 </div>
             ) : (

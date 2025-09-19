@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/dbService';
@@ -6,13 +7,8 @@ import { useLanguage } from '../contexts/LanguageContext';
 import DataTable from '../components/common/DataTable';
 import Button from '../components/common/Button';
 import EmailDraftModal from '../components/email/EmailDraftModal';
-import { ViewState } from '../App';
 
-interface EmailDraftsPageProps {
-    setView: (view: ViewState) => void;
-}
-
-const EmailDraftsPage = ({ setView }: EmailDraftsPageProps) => {
+const EmailDraftsPage = () => {
     const { t } = useLanguage();
     const drafts = useLiveQuery(() => db.emailDrafts.orderBy('createdAt').reverse().toArray(), []) || [];
     const [selectedDraft, setSelectedDraft] = useState<EmailDraft | null>(null);

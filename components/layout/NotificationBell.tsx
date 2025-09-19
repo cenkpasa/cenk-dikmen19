@@ -2,13 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNotificationCenter } from '@/contexts/NotificationCenterContext';
 import NotificationPanel from '@/components/layout/NotificationPanel';
-import { ViewState } from '@/App';
 
-interface NotificationBellProps {
-    setView: (view: ViewState) => void;
-}
-
-const NotificationBell = ({ setView }: NotificationBellProps) => {
+const NotificationBell = () => {
     const { unreadCount } = useNotificationCenter();
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -40,7 +35,7 @@ const NotificationBell = ({ setView }: NotificationBellProps) => {
                     </span>
                 )}
             </button>
-            {isPanelOpen && <NotificationPanel setView={setView} onClose={() => setIsPanelOpen(false)} />}
+            {isPanelOpen && <NotificationPanel onClose={() => setIsPanelOpen(false)} />}
         </div>
     );
 };

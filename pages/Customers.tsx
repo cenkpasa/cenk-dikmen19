@@ -1,5 +1,4 @@
 
-
 import React, { useState, useRef } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,14 +10,13 @@ import Button from '../components/common/Button';
 import CustomerForm from '../components/forms/CustomerForm';
 import Modal from '../components/common/Modal';
 import CustomerDetailModal from '../components/customers/CustomerDetailModal';
-import { ViewState } from '../App';
 import * as XLSX from 'xlsx';
 // Fix: Changed to a named import because ExcelMappingModal does not have a default export.
 import { ExcelMappingModal } from '../components/customers/ExcelMappingModal';
 import ImportConfirmationModal from '../components/customers/ImportConfirmationModal';
 import { formatDate } from '../utils/formatting';
 
-const Customers = ({ setView }: { setView: (view: ViewState) => void; }) => {
+const Customers = () => {
     const { customers, deleteCustomer, bulkAddCustomers } = useData();
     const { t } = useLanguage();
     const { showNotification } = useNotification();
@@ -188,7 +186,6 @@ const Customers = ({ setView }: { setView: (view: ViewState) => void; }) => {
                     onClose={() => setIsDetailModalOpen(false)}
                     customer={selectedCustomer}
                     onEdit={handleEdit}
-                    setView={setView}
                 />
             )}
              <Modal
