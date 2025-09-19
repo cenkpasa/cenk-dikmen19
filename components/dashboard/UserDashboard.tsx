@@ -1,4 +1,7 @@
 
+
+
+
 import React, { useMemo } from 'react';
 import StatCard from '@/components/dashboard/StatCard';
 import LatestActivity from '@/components/dashboard/LatestActivity';
@@ -13,22 +16,22 @@ import PersonalGoalTracker from '@/components/dashboard/PersonalGoalTracker';
 const UserDashboard = ({ setView }: { setView: (view: ViewState) => void; }) => {
     const { currentUser } = useAuth();
     const { appointments } = useData();
-    const { invoices } = useErp();
+    const { faturalar } = useErp();
     const { t } = useLanguage();
     
     const userSales = useMemo(() => {
-        if (!currentUser) return 0;
+        if (!currentUser || !faturalar) return 0;
         const now = new Date();
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
 
-        return invoices
+        return faturalar
             .filter(inv => {
-                const invDate = new Date(inv.date);
-                return inv.userId === currentUser.id && invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear;
+                const invDate = new Date(inv.tarih);
+                return inv.kullaniciId === currentUser.id && invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear;
             })
-            .reduce((sum, inv) => sum + inv.totalAmount, 0);
-    }, [invoices, currentUser]);
+            .reduce((sum, inv) => sum + inv.toplamTutar, 0);
+    }, [faturalar, currentUser]);
 
     const userAppointments = useMemo(() => {
         if (!currentUser) return [];

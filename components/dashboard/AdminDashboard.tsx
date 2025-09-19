@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useMemo } from 'react';
 import StatCard from '@/components/dashboard/StatCard';
 import BarChart from '@/components/dashboard/BarChart';
@@ -10,7 +11,6 @@ import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ViewState } from '@/App';
-import { useErp } from '@/contexts/ErpContext';
 import AIInsightCenter from '@/components/dashboard/AIInsightCenter';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/services/dbService';
@@ -19,7 +19,6 @@ import ExchangeRateCard from './ExchangeRateCard';
 const AdminDashboard = ({ setView }: { setView: (view: ViewState) => void; }) => {
     const { customers, appointments } = useData();
     const { users } = useAuth();
-    const { invoices } = useErp();
     const { t } = useLanguage();
     
     const incomingInvoices = useLiveQuery(() => db.incomingInvoices.toArray(), []) || [];

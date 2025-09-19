@@ -184,18 +184,6 @@ export interface Offer {
     aiFollowUpEmail?: string;
 }
 
-export interface StockItem {
-    id: string; 
-    erpId: string;
-    sku: string;
-    name: string;
-    barcode?: string;
-    unit?: string;
-    price: number;
-    isActive: boolean;
-    lastSync: string;
-}
-
 export interface Warehouse {
     id: string;
     code: string;
@@ -207,22 +195,6 @@ export interface StockLevel {
     stockItemId: string; 
     warehouseCode: string; 
     qtyOnHand: number;
-}
-
-
-export interface Invoice {
-    id: string;
-    customerId: string;
-    userId: string;
-    date: string;
-    totalAmount: number;
-    currency: 'TRY' | 'USD' | 'EUR';
-    items: {
-        stockId: string;
-        quantity: number;
-        price: number;
-    }[];
-    description?: string;
 }
 
 export interface IncomingInvoice {
@@ -504,3 +476,35 @@ export interface TechnicalInquiry {
     comments: string;
     formData: Partial<DrillingFormData> | Partial<TappingFormData> | Partial<EndMillFormData>;
 }
+
+// --- New Strict Types from Patch ---
+
+export type ParaBirimi = 'TRY' | 'USD' | 'EUR';
+
+export interface Fatura {
+  id: string;
+  faturaNo: string;
+  musteriId: string;
+  kullaniciId?: string;
+  tarih: string; // ISO format
+  paraBirimi: ParaBirimi;
+  toplamTutar: number;
+}
+
+export interface StokOgeleri {
+  id?: string; // local db id
+  kod: string; // ERP: code/StokKodu
+  ad: string; // ERP: name/StokAdi
+  birim?: string | null; // ERP: unit/Birim
+  depo?: string | null; // ERP: depot/Depo
+  fiyat?: number | null; // ERP: price/SatisFiyat
+  kdv?: number | null; // ERP: vatRate/Kdv
+}
+
+// ERP-specific types from patch
+export type CariHareket = { cariCode: string; date: string; docNo?: string | null; debt?: number | null; credit?: number | null; balance?: number | null; };
+export type Teklif = { quoteNo: string; date: string; cariCode?: string; total?: number | null; };
+
+// Puantaj Raporu types
+export type LocationPing = { userId: string; ts: string; lat: number; lon: number; };
+export type DayEdge = { userId: string; date: string; first: string; last: string; };

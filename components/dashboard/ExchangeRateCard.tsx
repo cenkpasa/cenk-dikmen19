@@ -40,6 +40,7 @@ const ExchangeRateCard = () => {
             <div className="mt-1">
                 {isLoading ? (
                     <div className="flex justify-center items-center h-16">
+                        {/* Fix: Added size prop to Loader component call */}
                         <Loader size="sm" />
                     </div>
                 ) : error ? (

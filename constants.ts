@@ -1,4 +1,4 @@
-import { User, Appointment, Invoice, StockItem, Customer, Offer, OfferItem, IncomingInvoice, OutgoingInvoice, FinancialPlan, FinancialPlanItem } from './types';
+import { User, Appointment, Customer, Offer, OfferItem, IncomingInvoice, OutgoingInvoice, FinancialPlan, FinancialPlanItem } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 // CONFIG
@@ -40,6 +40,7 @@ export const COMPANY_INFO = {
     address: 'İvedik OSB, Melih Gökçek Blv. proted park iş merkezi D:151/4, 06378 Yenimahalle/Ankara',
     workStartTime: '08:30',
     workEndTime: '18:00',
+    workToleranceMin: 5, // 5 minute tolerance for late/early punches
     mileageRate: 2.70,
 };
 
@@ -97,6 +98,9 @@ export const MESSAGES: Record<string, Record<string, string>> = {
         'error': 'Hata',
         'warning': 'Uyarı',
         'info': 'Bilgi',
+        // Fix: Added missing keys for ERP sync notifications
+        'syncSuccess': 'Senkronizasyon tamamlandı.',
+        'syncError': 'Senkronizasyon sırasında bir hata oluştu.',
 
 
         // --- Auth & Login ---
@@ -388,6 +392,7 @@ export const MESSAGES: Record<string, Record<string, string>> = {
         'generateFollowUpEmail': 'Takip E-postası Oluştur',
         'aiGeneratedEmail': 'Yapay Zeka E-posta Taslağı',
         'saveEmail': 'E-postayı Kaydet',
+        'currency': 'Para Birimi',
 
         // --- Email & Drafts ---
         'gmailSecurityWarningTitle': 'E-posta İşlevselliği Güncellemesi',

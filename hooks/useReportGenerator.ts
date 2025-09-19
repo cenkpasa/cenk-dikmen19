@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useErp } from '../contexts/ErpContext';
-import { User, Invoice, Interview, Customer, Offer, ReportType, KmRecord, LocationRecord } from '../types';
+import { User, Interview, Customer, Offer, ReportType, KmRecord, LocationRecord, Fatura } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { usePersonnel } from '../contexts/PersonnelContext';
 import { COMPANY_INFO } from '../constants';
@@ -38,13 +38,13 @@ const determineCategory = (description: string): string => {
 
 export const useReportGenerator = (filters: ReportFilters) => {
     const { interviews, customers, offers, appointments } = useData();
-    const { invoices } = useErp();
+    const { faturalar } = useErp();
     const { users } = useAuth();
     const { t } = useLanguage();
     const { kmRecords, locationHistory } = usePersonnel();
 
     const generatedData = useMemo(() => {
-        if (!filters.dateRange.start || !filters.dateRange.end) {
+        if (!filters.dateRange.start || !filters.dateRange.end || !faturalar) {
             return { columns: [], data: [], summary: {}, title: 'Rapor' };
         }
 
@@ -55,15 +55,15 @@ export const useReportGenerator = (filters: ReportFilters) => {
 
         switch (filters.reportType) {
             case 'sales_performance': {
-                const filteredInvoices = invoices.filter(inv => {
-                    const invDate = new Date(inv.date);
-                    const userMatch = !filters.userId || inv.userId === filters.userId;
+                const filteredInvoices = faturalar.filter(inv => {
+                    const invDate = new Date(inv.tarih);
+                    const userMatch = !filters.userId || inv.kullaniciId === filters.userId;
                     return invDate >= startDate && invDate <= endDate && userMatch;
                 });
 
                 const salesByUser = users.map(user => {
-                    const userInvoices = filteredInvoices.filter(inv => inv.userId === user.id);
-                    const totalSales = userInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+                    const userInvoices = filteredInvoices.filter(inv => inv.kullaniciId === user.id);
+                    const totalSales = userInvoices.reduce((sum, inv) => sum + inv.toplamTutar, 0);
                     return {
                         userId: user.id,
                         userName: user.name,
@@ -195,37 +195,39 @@ export const useReportGenerator = (filters: ReportFilters) => {
                 };
             }
             case 'customer_invoice_analysis': {
-                // This logic remains unchanged
-                const filteredInvoices = invoices.filter(inv => {
-                    const invDate = new Date(inv.date);
+                const filteredInvoices = faturalar.filter(inv => {
+                    const invDate = new Date(inv.tarih);
                     return invDate >= startDate && invDate <= endDate;
                 });
 
                 const analysisByCustomer: Record<string, { total: number, count: number, categories: Record<string, number>, customerName: string }> = {};
 
                 for (const invoice of filteredInvoices) {
-                    if (!analysisByCustomer[invoice.customerId]) {
-                        const customer = customers.find(c => c.id === invoice.customerId);
-                        analysisByCustomer[invoice.customerId] = {
+                    const customerCode = invoice.musteriId;
+                    if (!customerCode) continue;
+
+                    if (!analysisByCustomer[customerCode]) {
+                        const customer = customers.find(c => c.currentCode === customerCode);
+                        analysisByCustomer[customerCode] = {
                             total: 0,
                             count: 0,
                             categories: {},
-                            customerName: customer?.name || 'Bilinmeyen Müşteri'
+                            customerName: customer?.name || customerCode
                         };
                     }
 
-                    const entry = analysisByCustomer[invoice.customerId];
-                    entry.total += invoice.totalAmount;
+                    const entry = analysisByCustomer[customerCode];
+                    entry.total += invoice.toplamTutar;
                     entry.count++;
                     
-                    const category = determineCategory(invoice.description || '');
-                    entry.categories[category] = (entry.categories[category] || 0) + invoice.totalAmount;
+                    const category = determineCategory(''); // Fatura type has no description
+                    entry.categories[category] = (entry.categories[category] || 0) + invoice.toplamTutar;
                 }
                 
-                const reportData = Object.entries(analysisByCustomer).map(([customerId, data]) => {
+                const reportData = Object.entries(analysisByCustomer).map(([customerCode, data]) => {
                     const topCategory = Object.entries(data.categories).sort(([, a], [, b]) => b - a)[0]?.[0] || 'N/A';
                     return {
-                        customerId,
+                        customerCode,
                         customerName: data.customerName,
                         totalSpending: data.total,
                         invoiceCount: data.count,
@@ -242,11 +244,11 @@ export const useReportGenerator = (filters: ReportFilters) => {
                 const categorySpending: Record<string, number> = {};
 
                 filteredInvoices.forEach(inv => {
-                    const month = new Date(inv.date).toISOString().slice(0, 7);
-                    monthlySpending[month] = (monthlySpending[month] || 0) + inv.totalAmount;
+                    const month = new Date(inv.tarih).toISOString().slice(0, 7);
+                    monthlySpending[month] = (monthlySpending[month] || 0) + inv.toplamTutar;
 
-                    const category = determineCategory(inv.description || '');
-                    categorySpending[category] = (categorySpending[category] || 0) + inv.totalAmount;
+                    const category = determineCategory('');
+                    categorySpending[category] = (categorySpending[category] || 0) + inv.toplamTutar;
                 });
                 
                 const sortedMonths = Object.keys(monthlySpending).sort();
@@ -285,7 +287,7 @@ export const useReportGenerator = (filters: ReportFilters) => {
                 return { columns: [], data: [], summary: {}, title: 'Rapor', chartData: null };
         }
 
-    }, [filters, invoices, users, interviews, customers, offers, appointments, t, kmRecords, locationHistory]);
+    }, [filters, faturalar, users, interviews, customers, offers, appointments, t, kmRecords, locationHistory]);
 
     return generatedData;
 };

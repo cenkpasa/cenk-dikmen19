@@ -1,107 +1,60 @@
-import React, { useState, useMemo } from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
-import { Reconciliation, Customer } from '../types';
-import { useReconciliation } from '../contexts/ReconciliationContext';
-import { useNotification } from '../contexts/NotificationContext';
-import Button from '../components/common/Button';
-import { useData } from '../contexts/DataContext';
-import DataTable from '../components/common/DataTable';
-import Modal from '../components/common/Modal';
-import { downloadReconciliationAsPdf } from '../services/pdfService';
-import { formatCurrency, formatDate } from '../utils/formatting';
-import Autocomplete from '../components/common/Autocomplete';
-import Input from '../components/common/Input';
+import React from 'react';
+import { useReconciliation } from '@/contexts/ReconciliationContext';
 
-const CreateReconciliationModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
-    const { t } = useLanguage();
-    const { addReconciliation } = useReconciliation();
-    const { customers } = useData();
-    const [state, setState] = useState({
-        customerId: '',
-        type: 'current_account' as Reconciliation['type'],
-        period: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
-        amount: 0,
-        currency: 'TRY' as Reconciliation['currency'],
-        details: '',
-        notes: ''
-    });
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { id, value } = e.target;
-        setState(prev => ({ ...prev, [id]: id === 'amount' ? parseFloat(value) || 0 : value }));
-    };
-
-    const handleSave = async () => {
-        if (!state.customerId) return;
-        await addReconciliation(state);
-        onClose();
-    };
-    
+function Box({ head, rows, cols }: any) {
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={t('createReconciliation')} footer={
-            <><Button variant="secondary" onClick={onClose}>{t('cancel')}</Button><Button onClick={handleSave}>{t('save')}</Button></>
-        }>
-            <div className="space-y-4">
-                <Autocomplete
-                    items={customers.map(c => ({ id: c.id, name: c.name }))}
-                    onSelect={(id) => setState(p => ({...p, customerId: id}))}
-                    placeholder={t('selectCustomer')}
-                />
-                <Input id="period" type="month" label={t('period')} value={state.period} onChange={handleChange} />
-                <Input id="amount" type="number" label={t('totalAmount')} value={String(state.amount)} onChange={handleChange} />
-                <Input id="details" label={t('details')} value={state.details} onChange={handleChange} />
-            </div>
-        </Modal>
-    );
-};
-
-const ReconciliationPage = () => {
-    const { t } = useLanguage();
-    const { reconciliations } = useReconciliation();
-    const { customers } = useData();
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-    const getStatusClass = (status: Reconciliation['status']) => {
-        switch (status) {
-            case 'approved': return 'bg-green-100 text-green-800';
-            case 'rejected': return 'bg-red-100 text-red-800';
-            case 'sent': return 'bg-blue-100 text-blue-800';
-            case 'in_review': return 'bg-purple-100 text-purple-800';
-            case 'draft': default: return 'bg-yellow-100 text-yellow-800';
-        }
-    };
-
-    const reconciliationColumns = [
-        { header: t('customer'), accessor: (item: Reconciliation) => customers.find(c => c.id === item.customerId)?.name || t('unknownCustomer') },
-        { header: t('type'), accessor: (item: Reconciliation) => t(item.type) },
-        { header: t('period'), accessor: (item: Reconciliation) => item.period },
-        { header: t('amount'), accessor: (item: Reconciliation) => formatCurrency(item.amount, item.currency) },
-        { header: t('status'), accessor: (item: Reconciliation) => <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusClass(item.status)}`}>{t(item.status)}</span> },
-        { header: t('createdAt'), accessor: (item: Reconciliation) => formatDate(item.createdAt) },
-        {
-            header: t('actions'),
-            accessor: (item: Reconciliation) => (
-                <Button size="sm" onClick={async () => {
-                     const customer = customers.find(c => c.id === item.customerId);
-                     if(customer) await downloadReconciliationAsPdf(item, customer, [], t)
-                }} icon="fas fa-file-pdf" />
-            )
-        }
-    ];
-
-    return (
-        <div className="space-y-6">
-            {isCreateModalOpen && <CreateReconciliationModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />}
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">{t('reconciliations')}</h1>
-                <Button onClick={() => setIsCreateModalOpen(true)} variant="primary" icon="fas fa-plus">{t('createReconciliation')}</Button>
-            </div>
-
-            <div className="bg-cnk-panel-light p-4 rounded-cnk-card shadow-md border">
-                <DataTable columns={reconciliationColumns} data={reconciliations} emptyStateMessage={t('noReconciliationYet')} />
+        <div className="border rounded-lg p-3 bg-white shadow-sm">
+            <div className="text-md font-semibold text-gray-700 mb-2">{head}</div>
+            <div className="max-h-64 overflow-auto text-xs">
+                {rows.length > 0 ? (
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                {cols.map((c: string) => (
+                                    <th key={c} className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">{c}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {rows.slice(0, 100).map((r: any, i: number) => (
+                                <tr key={i}>
+                                    {cols.map((c: string) => (
+                                        <td key={c} className="px-4 py-2 whitespace-nowrap">{String(r[c] ?? '')}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p className="text-gray-500 text-center py-4">Veri yok.</p>
+                )}
             </div>
         </div>
     );
-};
+}
 
-export default ReconciliationPage;
+function Section({ title, diff, cols }: any) {
+    return (
+        <div>
+            <h2 className="font-semibold text-xl mb-3 text-gray-800">{title}</h2>
+            <div className="grid md:grid-cols-3 gap-4">
+                <Box head={`Sadece Uygulamada (${diff.onlyLocal.length})`} rows={diff.onlyLocal} cols={cols} />
+                <Box head={`Sadece ERP'de (${diff.onlyErp.length})`} rows={diff.onlyErp} cols={cols} />
+                <Box head={`Çatışmalar (${diff.conflicts.length})`} rows={diff.conflicts.map((c: any) => c.right)} cols={cols} />
+            </div>
+        </div>
+    );
+}
+
+export default function ReconciliationPage() {
+    const { stokDiff, faturaDiff, cariDiff, teklifDiff } = useReconciliation();
+
+    return (
+        <div className="p-4 grid gap-8">
+            <Section title="Stok Mutabakatı" diff={stokDiff} cols={["code", "depot", "name", "price"]} />
+            <Section title="Fatura Mutabakatı" diff={faturaDiff} cols={["invoiceNo", "date", "total"]} />
+            <Section title="Cari Mutabakatı" diff={cariDiff} cols={["cariCode", "date", "docNo", "balance"]} />
+            <Section title="Teklif Mutabakatı" diff={teklifDiff} cols={["quoteNo", "date", "total"]} />
+        </div>
+    );
+}

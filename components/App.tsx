@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
@@ -50,7 +51,8 @@ const PageContent = ({ view, setView }: { view: ViewState; setView: (view: ViewS
         case 'konum-takip': return <LocationTrackingPage />;
         case 'hesaplama-araclari': return <CalculationToolsPage />;
         case 'yapay-zeka': return <AIHubPage />;
-        case 'erp-entegrasyonu': return <ErpIntegrationPage setView={setView} />;
+        // Fix: Removed setView prop as ErpIntegrationPage does not accept it.
+        case 'erp-entegrasyonu': return <ErpIntegrationPage />;
         case 'profile': return <Profile />;
         case 'ai-ayarlari': return <AISettingsPage />;
         case 'raporlar': return <ReportPage />;
@@ -141,7 +143,8 @@ const App = () => {
             <NotificationContainer />
             <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} executeCommand={executeCommand} setView={setView} />
             
-            <SidebarLeft view={view} setView={setView} isOpen={isLeftSidebarOpen} setIsOpen={setLeftSidebarOpen} />
+            {/* Fix: Removed view and setView props as SidebarLeft does not use them. NavLink handles active state internally. */}
+            <SidebarLeft isOpen={isLeftSidebarOpen} setIsOpen={setLeftSidebarOpen} />
             
             <div className="flex flex-col flex-grow min-w-0">
                 <Header 

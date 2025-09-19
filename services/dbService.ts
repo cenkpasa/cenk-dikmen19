@@ -1,8 +1,9 @@
 
 
 
+
 import Dexie, { type Table } from 'dexie';
-import { User, Customer, Appointment, Interview, Offer, ErpSettings, StockItem, Invoice, Notification, LeaveRequest, KmRecord, LocationRecord, AISettings, EmailDraft, Reconciliation, CalculatorState, CalculationHistoryItem, IncomingInvoice, OutgoingInvoice, AuditLog, ShiftTemplate, ShiftAssignment, Warehouse, StockLevel, SyncQueueItem, PayslipEntry, FinancialPlan, FinancialPlanItem, TechnicalInquiry } from '../types';
+import { User, Customer, Appointment, Interview, Offer, ErpSettings, StokOgeleri, Notification, LeaveRequest, KmRecord, LocationRecord, AISettings, EmailDraft, Reconciliation, CalculatorState, CalculationHistoryItem, IncomingInvoice, OutgoingInvoice, AuditLog, ShiftTemplate, ShiftAssignment, Warehouse, StockLevel, SyncQueueItem, PayslipEntry, FinancialPlan, FinancialPlanItem, TechnicalInquiry, Fatura } from '../types';
 import { DEFAULT_ADMIN, MOCK_APPOINTMENTS, MOCK_CUSTOMERS, MOCK_FINANCIAL_PLAN_2025 } from '../constants';
 import { MOCK_INCOMING_INVOICES, MOCK_OUTGOING_INVOICES } from './erpMockData';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,8 +15,8 @@ export class AppDatabase extends Dexie {
     interviews!: Table<Interview, string>;
     offers!: Table<Offer, string>;
     erpSettings!: Table<ErpSettings, 'default'>;
-    stockItems!: Table<StockItem, string>;
-    invoices!: Table<Invoice, string>;
+    stockItems!: Table<StokOgeleri, string>;
+    invoices!: Table<Fatura, string>;
     notifications!: Table<Notification, string>;
     leaveRequests!: Table<LeaveRequest, string>;
     kmRecords!: Table<KmRecord, string>;
@@ -41,15 +42,15 @@ export class AppDatabase extends Dexie {
 
     constructor() {
         super('CnkCrmDatabase');
-        (this as Dexie).version(34).stores({
+        (this as Dexie).version(35).stores({
             users: 'id, &username',
             customers: 'id, &currentCode, name, createdAt, status',
             appointments: 'id, customerId, start, userId',
             interviews: 'id, customerId, formTarihi, userId',
             offers: 'id, customerId, &teklifNo, createdAt, userId',
             erpSettings: 'id',
-            stockItems: 'id, &sku, name',
-            invoices: 'id, customerId, userId, date',
+            stockItems: 'id, &kod, ad',
+            invoices: 'id, &faturaNo, musteriId, kullaniciId, tarih',
             notifications: 'id, timestamp, isRead',
             leaveRequests: 'id, userId, requestDate, status',
             kmRecords: 'id, userId, date',

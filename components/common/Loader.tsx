@@ -1,20 +1,11 @@
-
 import React from 'react';
 
-interface LoaderProps {
-    size?: 'sm' | 'md' | 'lg';
-    fullScreen?: boolean;
-}
-
-const Loader = ({ size = 'md', fullScreen = false }: LoaderProps) => {
-    const sizeClasses = {
-        sm: 'w-6 h-6 border-4',
-        md: 'w-12 h-12 border-[5px]',
-        lg: 'w-16 h-16 border-8',
-    };
-
+const Loader = ({ fullScreen = false, size }: { fullScreen?: boolean; size?: 'sm' | 'md' }) => {
     const loader = (
-        <div className={`loader animate-spin rounded-full border-solid border-primary border-t-transparent ${sizeClasses[size]}`}></div>
+        // Fix: Conditionally set minHeight to avoid breaking layout for small loaders.
+        <div style={{ display: 'grid', placeItems: 'center', minHeight: size === 'sm' ? undefined : 200 }}>
+            <div className="animate-pulse">Yükleniyor...</div>
+        </div>
     );
 
     if (fullScreen) {
@@ -24,7 +15,7 @@ const Loader = ({ size = 'md', fullScreen = false }: LoaderProps) => {
             </div>
         );
     }
-
+    
     return loader;
 };
 

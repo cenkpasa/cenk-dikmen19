@@ -1,17 +1,11 @@
 
-import { Offer } from '@/types';
 
-type Currency = Offer['currency'];
 
-export const formatCurrency = (amount: number, currency: Currency): string => {
-    if (typeof amount !== 'number') {
-        amount = 0;
-    }
-    return new Intl.NumberFormat('tr-TR', {
-        style: 'currency',
-        currency: currency,
-    }).format(amount);
-};
+import { ParaBirimi } from '@/types';
+
+export function formatCurrency(v: number, ccy: ParaBirimi ='TRY') {
+  return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: ccy }).format(v || 0);
+}
 
 export const formatDate = (isoString?: string): string => {
     if (!isoString) return '';

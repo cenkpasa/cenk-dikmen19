@@ -42,6 +42,7 @@ const Button = ({
             {...props}
         >
             {isLoading ? (
+                // Fix: Added size prop to Loader component call
                 <Loader size="sm" />
             ) : (
                 <>

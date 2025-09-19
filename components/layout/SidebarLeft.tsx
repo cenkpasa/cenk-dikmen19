@@ -1,57 +1,54 @@
-
-
-
-
 import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { Page, UserRole } from '../../types';
-import { ViewState } from '../ai/App';
-import CnkLogo from '../assets/CnkLogo';
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Page, UserRole } from '@/types';
+import CnkLogo from '@/components/assets/CnkLogo';
 
-interface NavLink {
-    page: Page;
+interface NavLinkInfo {
+    path: string;
     labelKey: string;
     icon: string;
-    roles?: UserRole[]; 
+    roles?: UserRole[];
+    page: Page; // Keep for reference if needed, but path is primary
 }
 
-const NAV_LINKS: NavLink[] = [
-    { page: 'dashboard', labelKey: 'dashboard', icon: 'fas fa-tachometer-alt' },
-    { page: 'customers', labelKey: 'customerList', icon: 'fas fa-users' },
-    { page: 'appointments', labelKey: 'appointmentsTitle', icon: 'fas fa-calendar-check' },
-    { page: 'gorusme-formu', labelKey: 'interviewFormsTitle', icon: 'fas fa-file-signature' },
-    { page: 'teklif-yaz', labelKey: 'offerManagement', icon: 'fas fa-file-invoice-dollar' },
-    { page: 'mutabakat', labelKey: 'reconciliation', icon: 'fas fa-handshake', roles: ['admin', 'muhasebe'] },
-    { page: 'email-taslaklari', labelKey: 'emailDrafts', icon: 'fas fa-envelope-open-text' },
-    { page: 'yapay-zeka', labelKey: 'aiHubTitle', icon: 'fas fa-robot' },
-    { page: 'raporlar', labelKey: 'reports', icon: 'fas fa-chart-line', roles: ['admin'] },
-    { page: 'audit-log', labelKey: 'auditLog', icon: 'fas fa-history', roles: ['admin'] },
-    { page: 'personnel', labelKey: 'personnelManagement', icon: 'fas fa-user-cog' },
-    { page: 'konum-takip', labelKey: 'locationTracking', icon: 'fas fa-map-marker-alt', roles: ['admin'] },
-    { page: 'erp-entegrasyonu', labelKey: 'erpIntegration', icon: 'fas fa-cogs', roles: ['admin', 'muhasebe'] },
-    { page: 'hesaplama-araclari', labelKey: 'calculationTools', icon: 'fas fa-calculator' },
-    { page: 'profile', labelKey: 'profileTitle', icon: 'fas fa-user' },
-    { page: 'ai-ayarlari', labelKey: 'aiSettings', icon: 'fas fa-cogs', roles: ['admin'] },
+const NAV_LINKS: NavLinkInfo[] = [
+    { path: '/', page: 'dashboard', labelKey: 'dashboard', icon: 'fas fa-tachometer-alt' },
+    { path: '/customers', page: 'customers', labelKey: 'customerList', icon: 'fas fa-users' },
+    { path: '/appointments', page: 'appointments', labelKey: 'appointmentsTitle', icon: 'fas fa-calendar-check' },
+    { path: '/interviews', page: 'gorusme-formu', labelKey: 'interviewFormsTitle', icon: 'fas fa-file-signature' },
+    { path: '/offers', page: 'teklif-yaz', labelKey: 'offerManagement', icon: 'fas fa-file-invoice-dollar' },
+    { path: '/reconciliations', page: 'mutabakat', labelKey: 'reconciliation', icon: 'fas fa-handshake', roles: ['admin', 'muhasebe'] },
+    { path: '/email-drafts', page: 'email-taslaklari', labelKey: 'emailDrafts', icon: 'fas fa-envelope-open-text' },
+    { path: '/ai-hub', page: 'yapay-zeka', labelKey: 'aiHubTitle', icon: 'fas fa-robot' },
+    { path: '/reports', page: 'raporlar', labelKey: 'reports', icon: 'fas fa-chart-line', roles: ['admin'] },
+    { path: '/audit-log', page: 'audit-log', labelKey: 'auditLog', icon: 'fas fa-history', roles: ['admin'] },
+    { path: '/personnel', page: 'personnel', labelKey: 'personnelManagement', icon: 'fas fa-user-cog' },
+    { path: '/location-tracking', page: 'konum-takip', labelKey: 'locationTracking', icon: 'fas fa-map-marker-alt', roles: ['admin'] },
+    { path: '/erp', page: 'erp-entegrasyonu', labelKey: 'erpIntegration', icon: 'fas fa-cogs', roles: ['admin', 'muhasebe'] },
+    { path: '/calculators', page: 'hesaplama-araclari', labelKey: 'calculationTools', icon: 'fas fa-calculator' },
+    { path: '/profile', page: 'profile', labelKey: 'profileTitle', icon: 'fas fa-user' },
+    { path: '/ai-settings', page: 'ai-ayarlari', labelKey: 'aiSettings', icon: 'fas fa-cogs', roles: ['admin'] },
 ];
 
 interface SidebarLeftProps {
-    view: ViewState;
-    setView: (view: ViewState) => void;
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
 }
 
-const SidebarLeft = ({ view, setView, isOpen, setIsOpen }: SidebarLeftProps) => {
+const SidebarLeft = ({ isOpen, setIsOpen }: SidebarLeftProps) => {
     const { logout, currentUser } = useAuth();
     const { language, setLanguage, t } = useLanguage();
 
-    const handleLinkClick = (newPage: Page) => {
-        setView({ page: newPage });
+    const handleLinkClick = () => {
         if (window.innerWidth < 768) {
             setIsOpen(false);
         }
     };
+    
+    const activeLinkClass = 'bg-cnk-accent-primary text-white';
+    const inactiveLinkClass = 'hover:bg-cnk-accent-primary/10 text-cnk-sidebar-txt-dark';
 
     return (
         <>
@@ -71,20 +68,19 @@ const SidebarLeft = ({ view, setView, isOpen, setIsOpen }: SidebarLeftProps) => 
                         if (link.roles && !link.roles.includes(currentUser!.role)) {
                             return null;
                         }
-                        const isActive = view.page === link.page;
 
                         return (
-                            <li key={link.page}>
-                                <a
-                                    href="#"
-                                    onClick={(e) => { e.preventDefault(); handleLinkClick(link.page); }}
-                                    className={`relative flex items-center justify-between rounded-cnk-element px-4 py-3 text-sm font-medium ${isActive ? 'bg-cnk-accent-primary text-white' : 'hover:bg-cnk-accent-primary/10 text-cnk-sidebar-txt-dark'}`}
+                            <li key={link.path}>
+                                <NavLink
+                                    to={link.path}
+                                    onClick={handleLinkClick}
+                                    className={({ isActive }) => `relative flex items-center justify-between rounded-cnk-element px-4 py-3 text-sm font-medium ${isActive ? activeLinkClass : inactiveLinkClass}`}
                                 >
                                     <div className="flex items-center gap-4">
                                         <i className={`${link.icon} w-5 text-center text-lg`}></i>
                                         <span>{t(link.labelKey)}</span>
                                     </div>
-                                a>
+                                </NavLink>
                             </li>
                         );
                     })}

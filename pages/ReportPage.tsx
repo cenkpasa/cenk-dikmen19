@@ -9,6 +9,7 @@ import InvoiceAnalysisChart from '../components/reports/InvoiceAnalysisChart';
 import { ReportType } from '../types';
 import { COMPANY_INFO } from '../constants';
 import { formatCurrency } from '../utils/formatting';
+import PuantajRaporu from '@/components/reports/PuantajRaporu';
 
 const ReportControls = ({ filters, setFilters, isAdmin }: { filters: ReportFilters, setFilters: React.Dispatch<React.SetStateAction<ReportFilters>>, isAdmin: boolean }) => {
     const { t } = useLanguage();
@@ -65,6 +66,7 @@ const ReportControls = ({ filters, setFilters, isAdmin }: { filters: ReportFilte
 const ReportPage = () => {
     const { currentUser } = useAuth();
     const { t } = useLanguage();
+    const [activeTab, setActiveTab] = useState('standard');
     const [filters, setFilters] = useState<ReportFilters>({
         reportType: 'sales_performance',
         dateRange: { start: new Date(new Date().setDate(1)).toISOString().slice(0,10), end: new Date().toISOString().slice(0,10) },
@@ -94,39 +96,58 @@ const ReportPage = () => {
         }
         return null;
     };
+    
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10);
+
 
     return (
         <div className="space-y-6">
-            <ReportControls filters={filters} setFilters={setFilters} isAdmin={currentUser?.role === 'admin'} />
+            <div className="flex border-b">
+                <button onClick={() => setActiveTab('standard')} className={`px-4 py-2 text-sm font-medium ${activeTab === 'standard' ? 'border-b-2 border-cnk-accent-primary text-cnk-accent-primary' : ''}`}>Standart Raporlar</button>
+                <button onClick={() => setActiveTab('puantaj')} className={`px-4 py-2 text-sm font-medium ${activeTab === 'puantaj' ? 'border-b-2 border-cnk-accent-primary text-cnk-accent-primary' : ''}`}>Puantaj Raporu</button>
+            </div>
 
-            <div className="bg-cnk-panel-light p-4 rounded-cnk-card shadow-md border border-cnk-border-light">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold">{title}</h2>
-                    <div className="flex gap-2">
-                        <Button onClick={() => exportToExcel(data, columns.map(c => ({...c, header: t(c.header)})), title)} className="px-3 py-1 bg-green-600 text-white rounded-md text-sm">Excel'e Aktar</Button>
-                        <Button onClick={() => exportToPdf(data, columns.map(c => ({...c, header: t(c.header)})), title, title)} className="px-3 py-1 bg-red-600 text-white rounded-md text-sm">PDF'e Aktar</Button>
-                    </div>
-                </div>
-                
-                <ReportHeader />
-
-                {data.length > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <DataTable columns={columns.map(c => ({...c, header: t(c.header)}))} data={data} />
-                        <div>
-                            {filters.reportType === 'customer_invoice_analysis' && chartData && <InvoiceAnalysisChart chartData={chartData} />}
-                            <div className="mt-4 p-4 bg-cnk-bg-light rounded-cnk-element">
-                                <h3 className="font-bold mb-2">Özet</h3>
-                                {Object.entries(summary).map(([key, value]) => (
-                                    <p key={key}><strong>{t(key)}:</strong> {value}</p>
-                                ))}
+            {activeTab === 'standard' && (
+                <>
+                    <ReportControls filters={filters} setFilters={setFilters} isAdmin={currentUser?.role === 'admin'} />
+                    <div className="bg-cnk-panel-light p-4 rounded-cnk-card shadow-md border border-cnk-border-light">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold">{title}</h2>
+                            <div className="flex gap-2">
+                                <Button onClick={() => exportToExcel(data, columns.map(c => ({...c, header: t(c.header)})), title)} className="px-3 py-1 bg-green-600 text-white rounded-md text-sm">Excel'e Aktar</Button>
+                                <Button onClick={() => exportToPdf(data, columns.map(c => ({...c, header: t(c.header)})), title, title)} className="px-3 py-1 bg-red-600 text-white rounded-md text-sm">PDF'e Aktar</Button>
                             </div>
                         </div>
+                        
+                        <ReportHeader />
+
+                        {data.length > 0 ? (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <DataTable columns={columns.map(c => ({...c, header: t(c.header)}))} data={data} />
+                                <div>
+                                    {filters.reportType === 'customer_invoice_analysis' && chartData && <InvoiceAnalysisChart chartData={chartData} />}
+                                    <div className="mt-4 p-4 bg-cnk-bg-light rounded-cnk-element">
+                                        <h3 className="font-bold mb-2">Özet</h3>
+                                        {Object.entries(summary).map(([key, value]) => (
+                                            <p key={key}><strong>{t(key)}:</strong> {value}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-center text-gray-500 py-8">Bu kriterlere uygun veri bulunamadı.</p>
+                        )}
                     </div>
-                ) : (
-                    <p className="text-center text-gray-500 py-8">Bu kriterlere uygun veri bulunamadı.</p>
-                )}
-            </div>
+                </>
+            )}
+            
+            {activeTab === 'puantaj' && (
+                 <div className="bg-cnk-panel-light p-4 rounded-cnk-card shadow-md border border-cnk-border-light">
+                     <PuantajRaporu start={startOfMonth} end={endOfMonth} />
+                 </div>
+            )}
         </div>
     );
 };

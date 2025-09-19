@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Interview, Customer } from '../types';
 import DataTable from '../components/common/DataTable';
 import Button from '../components/common/Button';
-import { ViewState } from '../components/ai/App';
+import { ViewState } from '../components/App';
 import BworksLogo from '../components/assets/BworksLogo';
 import VoiceNoteModal from '../components/ai/VoiceNoteModal';
 import Autocomplete from '../components/common/Autocomplete';

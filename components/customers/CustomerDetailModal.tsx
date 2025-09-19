@@ -1,7 +1,9 @@
 
 
+
+
 import React, { useState, useMemo } from 'react';
-import { Customer, Invoice, Reconciliation } from '@/types';
+import { Customer, Reconciliation, Fatura } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useData } from '@/contexts/DataContext';
 import { analyzeOpportunities, suggestNextStep, analyzeSentiment } from '@/services/aiService';
@@ -12,9 +14,11 @@ import ActivityTimeline from '@/components/customers/ActivityTimeline';
 import { ViewState } from '@/App';
 import Loader from '@/components/common/Loader';
 import { useErp } from '@/contexts/ErpContext';
-import { useReconciliation } from '@/contexts/ReconciliationContext';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/services/dbService';
 import DataTable from '@/components/common/DataTable';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatCurrency } from '@/utils/formatting';
 
 
 interface CustomerDetailModalProps {
@@ -63,8 +67,8 @@ const AIAnalysisSection = ({ title, icon, analysisData, onRun, isLoading }: { ti
 const CustomerDetailModal = ({ isOpen, onClose, customer, onEdit, setView }: CustomerDetailModalProps) => {
     const { t } = useLanguage();
     const { updateCustomer } = useData();
-    const { invoices } = useErp();
-    const { reconciliations } = useReconciliation();
+    const { faturalar } = useErp();
+    const reconciliations = useLiveQuery(() => db.reconciliations.where('customerId').equals(customer.id).toArray(), [customer.id]) || [];
     const { showNotification } = useNotification();
     const { currentUser } = useAuth();
     const [activeTab, setActiveTab] = useState<'timeline' | 'ai' | 'invoices' | 'reconciliations'>('timeline');
@@ -75,8 +79,8 @@ const CustomerDetailModal = ({ isOpen, onClose, customer, onEdit, setView }: Cus
     });
 
     const customerInvoices = useMemo(() => 
-        invoices.filter(inv => inv.customerId === customer.id)
-    , [invoices, customer.id]);
+        (faturalar || []).filter(inv => inv.musteriId === customer.currentCode)
+    , [faturalar, customer.currentCode]);
 
     const customerReconciliations = useMemo(() => 
         reconciliations.filter(r => r.customerId === customer.id)
@@ -115,11 +119,12 @@ const CustomerDetailModal = ({ isOpen, onClose, customer, onEdit, setView }: Cus
             setLoadingAI(prev => ({ ...prev, [type]: false }));
         }
     };
-
+    
     const invoiceColumns = [
-        { header: t('invoiceNo'), accessor: (item: Invoice) => item.id },
-        { header: t('date'), accessor: (item: Invoice) => new Date(item.date).toLocaleDateString() },
-        { header: t('totalAmount'), accessor: (item: Invoice) => item.totalAmount.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) },
+        { header: t('invoiceNo'), accessor: (item: Fatura) => item.faturaNo },
+        { header: t('date'), accessor: (item: Fatura) => new Date(item.tarih).toLocaleDateString() },
+        { header: t('currency'), accessor: (item: Fatura) => item.paraBirimi },
+        { header: t('totalAmount'), accessor: (item: Fatura) => formatCurrency(item.toplamTutar, item.paraBirimi) },
     ];
     
     const getStatusClass = (status: Reconciliation['status']) => {
