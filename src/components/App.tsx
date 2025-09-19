@@ -9,7 +9,7 @@ import { useNotificationCenter } from '@/contexts/NotificationCenterContext';
 import Loader from '@/components/common/Loader';
 import CommandPalette from '@/components/common/CommandPalette';
 import { syncService } from '@/services/syncService';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 // Lazy load pages
 const LoginPage = React.lazy(() => import('@/pages/LoginPage'));
@@ -37,7 +37,6 @@ const App = () => {
     const { NotificationContainer } = useNotification();
     const [isLeftSidebarOpen, setLeftSidebarOpen] = useState(false);
     const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-    const navigate = useNavigate();
 
     const { settings } = useSettings();
     const { addNotification } = useNotificationCenter();
@@ -109,7 +108,7 @@ const App = () => {
     return (
         <div className="app-container grid min-h-screen bg-cnk-bg-light text-cnk-txt-secondary-light md:grid-cols-[260px_1fr]">
             <NotificationContainer />
-            <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} executeCommand={executeCommand} setView={(view) => navigate(view.id ? `/${view.page}/${view.id}` : `/${view.page}`)} />
+            <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} executeCommand={executeCommand} />
             
             <SidebarLeft isOpen={isLeftSidebarOpen} setIsOpen={setLeftSidebarOpen} />
             
