@@ -1,17 +1,17 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
-// Fix: Added import for fileURLToPath to resolve __dirname issue in ESM.
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-// Fix: Replaced __dirname with a cross-platform compatible way to get the current directory in an ES module.
-      '@': path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'src')
+      '@': path.resolve(__dirname, './src'),
     },
-    dedupe: ['react', 'react-dom', '@tanstack/react-query'],
   },
-});
+})
