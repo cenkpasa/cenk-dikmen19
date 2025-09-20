@@ -1,0 +1,84 @@
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+#
+# Appknox: Leader in Mobile Application Security Testing Solutions <https://www.appknox.com/>
+#
+# To use this workflow, you must be an existing Appknox customer with GitHub Advanced Security (GHAS) enabled for your
+# repository.
+#
+# If you *are not* an existing customer, click here to contact us for licensing and pricing details:
+# <https://www.appknox.com/free-trial>.
+#
+# Instructions:
+#
+# 1. In your repository settings, navigate to 'Secrets' and click on 'New repository secret.' Name the
+#    secret APPKNOX_ACCESS_TOKEN and paste your appknox user token into the value field. If you don't have a appknox token
+#    or need to generate a new one for GitHub, visit the Appknox Platform, go to Account Settings->Developer Settings
+#    and create a token labeled GitHub
+#
+# 2. Refer to the detailed workflow below, make any required adjustments, and then save it to your repository. After the
+#    action executes, check the 'Security' tab for results
+
+name: Appknox
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  appknox:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build the app
+        run: ./gradlew build                                         # Update this to build your Android or iOS application
+
+      - name: Appknox GitHub action
+        uses: appknox/appknox-github-action@b7d2bfb2321d5544e97bffcba48557234ab953a4
+        with:
+          appknox_access_token: ${{ secrets.APPKNOX_ACCESS_TOKEN }}
+          file_path: app/build/outputs/apk/debug/app-debug.apk        # Specify the path to your .ipa or .apk here
+          risk_threshold: MEDIUM                                      # Update this to desired risk threshold [LOW, MEDIUM, HIGH, CRITICAL]
+          sarif: Enable
+
+      - name: Upload SARIF to GHAS
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: report.sarif
+            - name: Setup Node.js environment
+  uses: actions/setup-node@v5.0.0
+  with:
+    # Set always-auth in npmrc.
+    always-auth: # optional, default is false
+    # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
+    node-version: # optional
+    # File containing the version Spec of the version to use.  Examples: package.json, .nvmrc, .node-version, .tool-versions.
+    node-version-file: # optional
+    # Target architecture for Node to use. Examples: x86, x64. Will use system architecture by default.
+    architecture: # optional
+    # Set this option if you want the action to check for the latest available version that satisfies the version spec.
+    check-latest: # optional
+    # Optional registry to set up for auth. Will set the registry in a project level .npmrc and .yarnrc file, and set up auth to read in from env.NODE_AUTH_TOKEN.
+    registry-url: # optional
+    # Optional scope for authenticating against scoped registries. Will fall back to the repository owner when using the GitHub Packages registry (https://npm.pkg.github.com/).
+    scope: # optional
+    # Used to pull node distributions from node-versions. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    token: # optional, default is ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    # Used to specify a package manager for caching in the default directory. Supported values: npm, yarn, pnpm.
+    cache: # optional
+    # Set to false to disable automatic caching based on the package manager field in package.json. By default, caching is enabled if the package manager field is present.
+    package-manager-cache: # optional, default is true
+    # Used to specify the path to a dependency file: package-lock.json, yarn.lock, etc. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
+    # Used to specify an alternative mirror to downlooad Node.js binaries from
+    mirror: # optional
+    # The token used as Authorization header when fetching from the mirror
+    mirror-token: # optional
+          
